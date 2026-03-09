@@ -28,6 +28,11 @@ while running:
     # roter kreis
     pygame.draw.circle(screen, "red", center_pos, 150)
 
+    # weißer balken
+    offset = pygame.Vector2(-110, -30)
+    bar_pos = center_pos + offset
+    pygame.draw.rect(screen, "white", (bar_pos.x, bar_pos.y, 220, 60))
+
     # zeichnen
     pygame.display.flip()
 
