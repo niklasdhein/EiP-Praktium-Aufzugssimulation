@@ -12,3 +12,4 @@ class Elevator:
         self.level = 0          # tracks the current level of the elevator 
         self.direction = 0      # tracks the direction the elevator is moving 
         self.queue = []         # tracks the target levels
+        position_y = None       # int that tracks the specific 
