@@ -1,3 +1,5 @@
+from building import Building
+
 class Elevator:
     height = 200
     def __init__(self, capacity: int, speed: float) -> None:
