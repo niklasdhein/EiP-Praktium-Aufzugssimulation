@@ -2,7 +2,8 @@ from building import Building
 
 class Elevator:
     height = 200
-    def __init__(self, capacity: int, speed: float) -> None:
+    def __init__(self, elevator_controller: ElevatorController, capacity: int, speed: float) -> None:
+        self.elevator_controller = elevator_controller  # parent controller
         self.capacity = capacity    # capacity in kg 
         self.speed = speed          # speed of the elevator
 
@@ -51,6 +52,9 @@ class Elevator:
         # move the elevator a bit each frame
         self.graphics.y += self.direction * self.speed * dt
 
+        self.level = (self.elevator_controller.building.bottom_y - self.graphics.y) //\
+            Building.level_height
+
         # check if it has arrived
         if self.direction == -1 and self.graphics.y <= self.target_y\
         or self.direction == 1 and self.graphics.y >= self.target_y:
@@ -66,7 +70,7 @@ class Elevator:
         self.target_y = None
         self.direction = 0
 
-    def set_target(self, target_level: int, building: Building) -> None:
+    def set_target(self, target_level: int) -> None:
         """
         Calculates the target y postion and sets the target level
         the elevator should travel to.
@@ -74,6 +78,8 @@ class Elevator:
         each level as well as the window height, since the building is
         drawn bottom to top.
         """
+        building = self.elevator_controller.building
+
         # calculate target y position
         target_y = building.bottom_y - target_level * building.level_height - self.height
 
