@@ -25,13 +25,19 @@ clock = pygame.time.Clock()
 # == pre sim stuff ==
 
 # create the building to simulate
-building = Building(levels=5, bottom_y=height, width=width)
+building = Building(level_count=5, bottom_y=height, width=width)
 
 # create elevator controller
 elevator_controller = ElevatorController(building=building)
+building.elevator_controller = elevator_controller
 
 # create a line seperating elevators and rest
 seperator_line_rect = pygame.Rect(elevator_controller.get_total_elevators_width(), 0, 20, height) 
+
+# create a test passenger
+test_passengers = []
+for i in range(1):
+    test_passengers.append(Passenger(building=building))
 
 # === game loop ===
 
@@ -50,13 +56,15 @@ while running:
     # === calculations ===
 
     elevator_controller.update_elevators(dt=dt)
+    for passenger in test_passengers:
+        passenger.update(dt=dt)
 
 
     # === draw ===
 
     # draw each level 
-    for i in range(len(building.graphics)):
-        pygame.draw.rect(screen, (30, 30, 30) if i % 2 == 0 else (50, 50, 50), building.graphics[i])
+    for i in range(len(building.levels)):
+        pygame.draw.rect(screen, (30, 30, 30) if i % 2 == 0 else (50, 50, 50), building.levels[i].graphics)
 
     # draw the elevators
     for e in elevator_controller.elevators:
@@ -65,6 +73,10 @@ while running:
     # draw a line seperating elevators and rest of level
     pygame.draw.rect(screen, (200, 200, 200), seperator_line_rect)
 
-    # draw the window
+    # draw passenger
+    for passenger in test_passengers:
+        pygame.draw.rect(screen, (255, 0, 0), passenger.graphics)
+
+    # draw onto window
     pygame.display.flip()
 pygame.quit()

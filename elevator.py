@@ -53,7 +53,7 @@ class Elevator:
         self.graphics.y += self.direction * self.speed * dt
 
         self.level = (self.elevator_controller.building.bottom_y - self.graphics.y) //\
-            Building.level_height
+            self.elevator_controller.building.levels[0].height
 
         # check if it has arrived
         if self.direction == -1 and self.graphics.y <= self.target_y\
@@ -80,8 +80,10 @@ class Elevator:
         """
         building = self.elevator_controller.building
 
+        print("target level: " + str(target_level))
+
         # calculate target y position
-        target_y = building.bottom_y - target_level * building.level_height - self.height
+        target_y = building.levels[target_level].graphics.y + building.levels[target_level].height - self.height
 
         # return if elevator is already at exactly this positon
         if target_y == self.graphics.y: return

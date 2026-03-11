@@ -12,14 +12,14 @@ class ElevatorController:
         self.create_random_elevators()  # fills self.elevators
 
         self.call_buttons = {}
-        for i in range(self.building.levels):
+        for i in range(self.building.level_count):
             self.call_buttons[i] = {
                 "up": False,
                 "down": False
                 }
-        
-        # hardcode
-        self.call_buttons[4]["up"] = True
+
+    def call_elevator(self, to_level: int) -> None:
+        self.call_buttons[to_level]["up"] = True
 
     def update_elevators(self, dt: float) -> None:
         """
@@ -51,15 +51,12 @@ class ElevatorController:
         for i in range(random.randint(1, 1)):
             # instantiate the elevator
             random_elevator = Elevator(elevator_controller=self, capacity=random.randint(300, 2500), speed=200)
-            random_elevator.level = random.randint(0, self.building.levels-1)
+            random_elevator.level = random.randint(0, self.building.level_count-1)
             
             # instantiate the pygame part
-            random_elevator.graphics = pygame.Rect(offset_x, self.building.bottom_y - Building.level_height\
+            random_elevator.graphics = pygame.Rect(offset_x, self.building.bottom_y - self.building.levels[0].height\
                 * random_elevator.level - Elevator.height, random_elevator.width, Elevator.height)
             offset_x += random_elevator.width + margin_x
-
-            # give it a random target level
-            random_elevator.set_target(target_level=random.randint(0, self.building.levels-1))
 
             self.elevators.append(random_elevator)
 
