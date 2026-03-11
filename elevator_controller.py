@@ -1,6 +1,7 @@
 import random
 
 from elevator import Elevator
+from building import Building
 
 class ElevatorController:
     def __init__(self, elevators: [Elevator]) -> None:

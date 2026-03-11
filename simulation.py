@@ -115,5 +115,4 @@ while running:
 
     # draw the window
     pygame.display.flip()
-
 pygame.quit()
