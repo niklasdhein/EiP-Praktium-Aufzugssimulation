@@ -6,6 +6,8 @@ class Passenger:
     annoyed = "annoyed"
     in_elevator = "in_elevator"
     using_staircase = "using_staircase"
+    walking = "walking"
+    target_reached = "target_reached"
 
     def __init__(self, weight: int, target_level: int, patience: int) -> None:
         self.weight = weight                               # weight in kg
@@ -28,4 +30,10 @@ class Passenger:
             pass
 
         elif self.state == self.using_staircase:
+            pass
+
+        elif self.state == self.walking:
+            pass
+
+        elif self.state == self.target_reached:
             pass
