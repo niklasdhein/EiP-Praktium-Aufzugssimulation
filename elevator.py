@@ -1,5 +1,3 @@
-from passenger import Passenger
-
 class Elevator:
     height = 200
     def __init__(self, capacity: int, speed: float) -> None:
@@ -18,7 +16,7 @@ class Elevator:
 
     def get_load(self) -> int:
         load = 0
-
+        # iterate over list of passengers
         for i in range(len(self.passengers)):
             load += self.passengers[i].weight
 
@@ -30,6 +28,9 @@ class Elevator:
         # check if overloaded
         if self.get_load() > self.capacity:
             self.passengers.pop()
-
-        if passenger.target_level not in self.queue:
+            return
+        # add target_level to queue
+        elif passenger.target_level not in self.queue:
             self.queue.append(passenger.target_level)
+        # passenger is in elevator
+        passenger.state = passenger.in_elevator
