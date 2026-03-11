@@ -1,5 +1,6 @@
 import pygame
 import random
+import math
 
 # custom scripts
 from elevator import Elevator
@@ -7,7 +8,49 @@ from elevator_controller import ElevatorController
 from passenger import Passenger
 from building import Building
 
+
+# === sim setup methods ===
+def create_random_elevators(building: Building, margin_x: int=20) -> [Elevator]:
+    """
+    Creates and returns a list of random elevator objects.
+    What it does:
+        - random capacity (big or small elevator)
+        - random travel speed
+        - random start level
+        - random start direction
+    Also creates a pygame rect used to draw the elevator.
+    """
+    random_elevators = []
+    offset_x = 0
+    for i in range(random.randint(2, 5)):
+        # instantiate the elevator
+        random_elevator = Elevator(capacity=random.randint(300, 2500), speed=200)
+        random_elevator.level = random.randint(0, building.levels-1)
+        
+        # instantiate the pygame part
+        random_elevator.graphics = pygame.Rect(offset_x, height - Building.level_height * random_elevator.level - Elevator.height, random_elevator.width, Elevator.height)
+        offset_x += random_elevator.width + margin_x
+
+        # give it a random target level
+        random_elevator.set_target(target_level=random.randint(0, building.levels-1), building=building)
+
+        random_elevators.append(random_elevator)
+    return random_elevators
+
+def get_total_elevator_width(elevators: [Elevator], margin_x: int=20) -> int:
+    """
+    Takes a list of elevators and the margin between each of them in px.
+    Then calculates the width all of the elevators need (x-axis)
+    and returns it.
+    """
+    total_elevator_width = 0
+    for e in elevators:
+        total_elevator_width += e.graphics.width
+    total_elevator_width += margin_x * (len(elevators)-1)
+    return total_elevator_width
+
 # === vars ===
+
 width = 1800
 height = 1500 
 
@@ -18,62 +61,55 @@ pygame.init()
 screen = pygame.display.set_mode((width, height))
 clock = pygame.time.Clock()
 
+
 # == pre sim stuff ==
 
 # create the building to simulate
-building = Building(levels=5)
+building = Building(levels=5, bottom_y=height)
+for i in range(building.levels):
+    building.graphics.append(pygame.Rect(0, building.bottom_y - (i+1)\
+    * Building.level_height, width, Building.level_height))
 
-# create random elevators
-random_elevators = []
-for i in range(random.randint(3,8)):
-    random_elevator = Elevator(capacity=random.randint(300, 2500), speed=10)
-    random_elevator.level = random.randint(0, building.levels-1)
-    random_elevators.append(random_elevator)
+# list of randomly generated elevator objects
+random_elevators = create_random_elevators(building=building)
+
+# calculate the width all elevators occupy
+total_elevator_width = get_total_elevator_width(random_elevators)
 
 # create elevator controller
-test_ec = ElevatorController(elevators=random_elevators)
+elevator_controller = ElevatorController(elevators=random_elevators)
+
+# create a line seperating elevators and rest
+seperator_line_rect = pygame.Rect(total_elevator_width, 0, 20, height) 
 
 # === game loop ===
 running = True
 while running:
+    # calculates delta time
+    dt = clock.tick(60) / 1000.0
+
     # exit when closing the window
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
-    # -- draw each level --
-    for i in range(building.levels):
-        level_rect = pygame.Rect(0, height - (i+1) * Building.level_height, width, Building.level_height)
-        pygame.draw.rect(screen, (100, 100, 100) if i % 2 == 0 else (50, 50, 50), level_rect)
-    
-    # -- elevator stuff --
-    # calculate the width all elevators (including margins) need
-    total_elevator_width = 0
-    margin_x = 20   # 20px space between elevators
-    for e in test_ec.elevators:
-        total_elevator_width += e.width
-    total_elevator_width += (len(test_ec.elevators) - 1) * margin_x
+    # === movement testing ===
+    # move each elevator to target level
+    for e in random_elevators:
+        e.move_to_target_level(dt=dt)
 
-    # draw the elevators according to their stats
-    offset_x = 0
-    for i in range(len(test_ec.elevators)):
-        # create pygame rect
-        elevator_rect = pygame.Rect(width // 2 - total_elevator_width // 2 + offset_x, height - Building.level_height * test_ec.elevators[i].level - Elevator.height, test_ec.elevators[i].width, Elevator.height)
+    # draw each level 
+    for i in range(len(building.graphics)):
+        pygame.draw.rect(screen, (30, 30, 30) if i % 2 == 0 else (50, 50, 50), building.graphics[i])
 
-        # calculate offset
-        offset_x += test_ec.elevators[i].width + margin_x
+    # draw the elevators
+    for e in random_elevators:
+        pygame.draw.rect(screen, (255, 255, 255), e.graphics)
 
-        # random color
-        # elevator_color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
-        elevator_color = (255, 255, 255)
-
-        # draw
-        pygame.draw.rect(screen, elevator_color, elevator_rect)
+    # draw a line seperating elevators and rest of level
+    pygame.draw.rect(screen, (200, 200, 200), seperator_line_rect)
 
     # draw the window
     pygame.display.flip()
-
-    # 60 fps limit
-    clock.tick(60)
 
 pygame.quit()
