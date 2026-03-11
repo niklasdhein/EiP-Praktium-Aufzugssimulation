@@ -22,7 +22,7 @@ def create_random_elevators(building: Building, margin_x: int=20) -> [Elevator]:
     """
     random_elevators = []
     offset_x = 0
-    for i in range(random.randint(2, 5)):
+    for i in range(random.randint(7, 7)):
         # instantiate the elevator
         random_elevator = Elevator(capacity=random.randint(300, 2500), speed=200)
         random_elevator.level = random.randint(0, building.levels-1)
@@ -65,7 +65,7 @@ clock = pygame.time.Clock()
 # == pre sim stuff ==
 
 # create the building to simulate
-building = Building(levels=5, bottom_y=height)
+building = Building(levels=6, bottom_y=height)
 for i in range(building.levels):
     building.graphics.append(pygame.Rect(0, building.bottom_y - (i+1)\
     * Building.level_height, width, Building.level_height))
@@ -87,16 +87,20 @@ running = True
 while running:
     # calculates delta time
     dt = clock.tick(60) / 1000.0
+    # print(f"FPS: {1/dt}")
 
     # exit when closing the window
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
-    # === movement testing ===
-    # move each elevator to target level
-    for e in random_elevators:
-        e.move_to_target_level(dt=dt)
+
+    # === calculations ===
+
+    elevator_controller.update_elevators(dt=dt, building=building)
+
+
+    # === draw ===
 
     # draw each level 
     for i in range(len(building.graphics)):

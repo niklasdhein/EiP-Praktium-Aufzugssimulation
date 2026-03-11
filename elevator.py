@@ -4,7 +4,7 @@ class Elevator:
         self.capacity = capacity    # capacity in kg 
         self.speed = speed          # speed of the elevator
 
-        if self.capacity > 1150:    # Change the width accordingly to capacity
+        if self.capacity > 1150:    # Change the width (px) accordingly to capacity
             self.width = 200
         else:
             self.width = 100
@@ -40,17 +40,12 @@ class Elevator:
         # passenger is in elevator
         passenger.state = passenger.in_elevator
 
-    def move_to_target_level(self, dt: float) -> None:
+    def move_to_target(self, dt: float) -> None:
         """
         Moves the elevator to the target level.
         In order to move smoothly and correctly it needs the deltatime calculated
         by pygame in the game loop.
-        It also needs the height of the levels in the building to calculate
-        the correct target coordinate.
         """
-        # return if no target is set to save resources
-        if not self.target_level: return
-
         # move the elevator a bit each frame
         self.graphics.y += self.direction * self.speed * dt
 
@@ -77,8 +72,13 @@ class Elevator:
         each level as well as the window height, since the building is
         drawn bottom to top.
         """
+        # calculate target y position
+        target_y = building.bottom_y - target_level * building.level_height - self.height
+
+        # return if elevator is already at exactly this positon
+        if target_y == self.graphics.y: return
+
         self.target_level = target_level
-        self.target_y = building.bottom_y - target_level * building.level_height - self.height
+        self.target_y = target_y
         if self.graphics.y < self.target_y: self.direction = 1
         elif self.graphics.y > self.target_y: self.direction = -1
-        else: self.direction = 0
