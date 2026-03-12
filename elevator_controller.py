@@ -40,32 +40,32 @@ class ElevatorController:
         the controller.
         """
         offset_x = 0
-        for i in range(random.randint(2, 2)):
+        for i in range(random.randint(1, 1)):
             # instantiate the elevator
-            random_elevator = Elevator(elevator_controller=self, capacity=random.randint(300, 2500), speed=200)
-            random_elevator.level = random.randint(0, self.building.level_count-1)
+            random_elevator = Elevator(elevator_controller=self, capacity=random.randint(300, 2500), speed=500)
+            # random_elevator.level = random.randint(0, self.building.level_count-1)
             
             # instantiate the pygame part
-            random_elevator.graphics = pygame.Rect(offset_x, self.building.bottom_y - self.building.levels[0].graphics.height\
-                * random_elevator.level - 200, random_elevator.width, 200)
+            random_elevator.graphics = pygame.Rect(offset_x, self.building.bottom_y - self.building.levels[0].background_gfx.height\
+                * 3 - 200, random_elevator.width, 200)
             offset_x += random_elevator.width + margin_x
 
             self.elevators.append(random_elevator)
 
     def try_to_send_elevator_to_call(self) -> None:
         # handle which elevator travels to which floor
-        for i in range(len(self.elevator_calls["up"])):
+        for call_up_level in self.elevator_calls["up"]:
             for elevator in self.elevators:
                 if len(elevator.queue) == 0:
-                    elevator.add_to_queue(self.elevator_calls["up"][i])
-                    self.elevator_calls["up"].pop(i)
+                    elevator.add_to_queue(call_up_level)
+                    self.elevator_calls["up"].pop(0)
                     break
 
-        for i in range(len(self.elevator_calls["down"])):
+        for call_down_level in self.elevator_calls["down"]:
             for elevator in self.elevators:
                 if len(elevator.queue) == 0:
-                    elevator.add_to_queue(self.elevator_calls["down"][i])
-                    self.elevator_calls["down"].pop(i)
+                    elevator.add_to_queue(call_down_level)
+                    self.elevator_calls["down"].pop(0)
                     break
 
     def check_for_new_calls(self) -> None:

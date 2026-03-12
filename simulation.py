@@ -36,7 +36,7 @@ seperator_line_rect = pygame.Rect(elevator_controller.get_total_elevators_width(
 
 # create a test passenger
 test_passengers = []
-for i in range(50):
+for i in range(10):
     random_start_level = building.levels[random.randint(0, building.level_count-1)]
     random_target_level = -1
     while True:
@@ -70,18 +70,43 @@ while running:
 
     # draw each level 
     for i in range(len(building.levels)):
-        pygame.draw.rect(screen, (30, 30, 30) if i % 2 == 0 else (50, 50, 50), building.levels[i].graphics)
+        pygame.draw.rect(screen, (30, 30, 30) if i % 2 == 0 else (50, 50, 50), building.levels[i].background_gfx)
+        pygame.draw.polygon(screen, 
+        (0, 0, 0) if not building.levels[i].up_pressed else (200, 0, 0),
+        [
+            (elevator_controller.get_total_elevators_width()+100, 
+            building.levels[i].background_gfx.y+80),
+            (elevator_controller.get_total_elevators_width()+120, 
+            building.levels[i].background_gfx.y+80),
+            (elevator_controller.get_total_elevators_width()+110, 
+            building.levels[i].background_gfx.y+55)
+        ])
+        pygame.draw.polygon(screen,
+        (0, 0, 0) if not building.levels[i].down_pressed else (200, 0, 0),
+        [    
+            (elevator_controller.get_total_elevators_width()+120, 
+            building.levels[i].background_gfx.y+55),
+            (elevator_controller.get_total_elevators_width()+140, 
+            building.levels[i].background_gfx.y+55),
+            (elevator_controller.get_total_elevators_width()+130, 
+            building.levels[i].background_gfx.y+80)
+        ]
+        )
 
     # draw the elevators
     for e in elevator_controller.elevators:
-        pygame.draw.rect(screen, (255, 255, 255), e.graphics)
+        pygame.draw.rect(screen, 
+        (255, 255, 255) if e.target_level != None else (0, 0, 200), 
+        e.graphics)
 
     # draw a line seperating elevators and rest of level
     pygame.draw.rect(screen, (200, 200, 200), seperator_line_rect)
 
     # draw passenger
     for passenger in test_passengers:
-        pygame.draw.rect(screen, (255, 0, 0), passenger.graphics)
+        pygame.draw.rect(screen, 
+        (255, 0, 0) if passenger.states["walking"] else (255, 255, 255), 
+        passenger.graphics)
 
     # draw onto window
     pygame.display.flip()

@@ -28,22 +28,49 @@ class Elevator:
 
         return load
 
-    def enter_passengers(self, passengers: [Passenger]) -> None:
-        for passenger in passengers:
-            if passenger.states["elevator_called"]:
-                passenger.states["in_elevator"] = True
-                self.passengers.append(passenger)
-
     def handle_arrival_at_target(self) -> None:
         # remove the call from the level
         self.target_level.up_pressed = False
         self.target_level.down_pressed = False
 
-        # load in passengers
-        self.enter_passengers(self.target_level.passengers)
+        if self.target_level in self.elevator_controller.elevator_calls["up"]:
+            new_calls_up = []
+            for call_level in self.elevator_controller.elevator_calls["up"]:
+                if call_level != self.target_level:
+                    new_calls_up.append(call_level)
+            self.elevator_controller.elevator_calls["up"] = new_calls_up
+        if self.target_level in self.elevator_controller.elevator_calls["down"]:
+            new_calls_down = []
+            for call_level in self.elevator_controller.elevator_calls["down"]:
+                if call_level != self.target_level:
+                    new_calls_down.append(call_level)
+            self.elevator_controller.elevator_calls["down"] = new_calls_down
+
+        # all passengers in the level
+        passengers_of_level = self.target_level.passengers
+
+        passengers_that_remain = []
+        for passenger in self.passengers:
+            passenger.current_level = self.target_level 
+            if passenger.current_level == passenger.target_level:   # kick out passengers at target
+                passenger.leave_elevator()
+            else:
+                passengers_that_remain.append(passenger)
+        self.passengers = passengers_that_remain    # update the passengers
+
+        # let new passengers enter
+        for passenger in passengers_of_level:
+            if passenger.states["elevator_called"]:
+                passenger.enter_elevator()
+                self.passengers.append(passenger)
 
         # stop elevator from moving
         self.remove_target()
+
+        # add new targets of the passengers
+        for passenger in self.passengers:
+            if passenger.target_level not in self.queue:
+                self.add_to_queue(passenger.target_level)
 
     def move_to_target(self, dt: float) -> None:
         """
@@ -70,16 +97,10 @@ class Elevator:
         self.target_y = None
         self.direction = 0
         self.queue.pop(0)
+        if len(self.queue) > 0: self.set_target(self.queue[0])
 
     def set_target(self, target_level: Level) -> None:
-        """
-        Calculates the target y postion and sets the target level
-        the elevator should travel to.
-        To do that correctly it needs information about the height of
-        each level as well as the window height, since the building is
-        drawn bottom to top.
-        """
-        target_y = target_level.graphics.y + target_level.graphics.height - self.graphics.height
+        target_y = target_level.background_gfx.y + target_level.background_gfx.height - self.graphics.height
 
         self.target_level = target_level
         self.target_y = target_y
