@@ -40,7 +40,7 @@ class ElevatorController:
         the controller.
         """
         offset_x = 0
-        for i in range(random.randint(1, 1)):
+        for i in range(random.randint(3, 3)):
             # instantiate the elevator
             random_elevator = Elevator(elevator_controller=self, capacity=random.randint(300, 2500), speed=500)
             # random_elevator.level = random.randint(0, self.building.level_count-1)

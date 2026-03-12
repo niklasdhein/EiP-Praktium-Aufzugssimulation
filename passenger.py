@@ -2,7 +2,7 @@ import pygame
 import random
 
 class Passenger:
-    def __init__(self, current_level: Level, target_level: Level, weight: int=120) -> None:
+    def __init__(self, current_level: Level, target_level: Level, weight: int=150) -> None:
         self.current_level = current_level          # level the passenger is in currently
         self.current_level.passengers.append(self)
         self.target_level = target_level            # level the passenger wants to travel to
@@ -27,15 +27,18 @@ class Passenger:
             60
             ) 
 
-    def leave_elevator(self) -> None:
+    def leave_elevator(self, target_x: int, new_level: Level) -> None:
         self.states["in_elevator"] = False
         self.states["walking"] = True
+
+        self.current_level = new_level
+        new_level.passengers.append(self)
 
         self.graphics.y = self.current_level.background_gfx.y + self.current_level.background_gfx.height - 60
         self.graphics.width = 30
         self.graphics.height = 60
 
-        self.walk_target_x = self.current_level.building.width
+        self.walk_target_x = target_x
         self.walk_direction = 1
 
     def enter_elevator(self) -> None:
@@ -60,8 +63,7 @@ class Passenger:
         or self.walk_direction == 1 and self.graphics.x >= self.walk_target_x:
             self.graphics.x = self.walk_target_x
             self.walk_direction = 0
-            self.walk_target_x = None
-            
+            self.walk_target_x = None          
             self.states["walking"] = False
 
     def update(self, dt: float) -> None:
@@ -76,6 +78,8 @@ class Passenger:
         # call elevator
         elif not self.states["elevator_called"] and not self.states["walking"] and not self.states["in_elevator"]:
             self.states["elevator_called"] = True
+
+            print("called elevator!")
 
             # decide wether travel up or down
             if self.target_level.level > self.current_level.level:

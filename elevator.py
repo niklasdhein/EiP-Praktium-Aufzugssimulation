@@ -29,10 +29,14 @@ class Elevator:
         return load
 
     def handle_arrival_at_target(self) -> None:
-        # remove the call from the level
+        # 1. when the elevator arrives at a level, remove 
+        # the call from the level for the elevator
         self.target_level.up_pressed = False
         self.target_level.down_pressed = False
 
+        # 2. if an elevator arrives at a level with a call, but the elevator was not
+        # called by this level and holds because he drops people of,
+        # then take them in and remove 
         if self.target_level in self.elevator_controller.elevator_calls["up"]:
             new_calls_up = []
             for call_level in self.elevator_controller.elevator_calls["up"]:
@@ -46,28 +50,40 @@ class Elevator:
                     new_calls_down.append(call_level)
             self.elevator_controller.elevator_calls["down"] = new_calls_down
 
-        # all passengers in the level
+        # 3. get all passengers on the level arrived
         passengers_of_level = self.target_level.passengers
 
+        # 4. drop off all people who want to exit on that level
+        # and also update the list of people still in the elevator
         passengers_that_remain = []
         for passenger in self.passengers:
-            passenger.current_level = self.target_level 
-            if passenger.current_level == passenger.target_level:   # kick out passengers at target
-                passenger.leave_elevator()
+            if self.target_level == passenger.target_level:     # kick out passengers at target
+                passenger.leave_elevator(self.elevator_controller.building.width, self.target_level)
             else:
                 passengers_that_remain.append(passenger)
         self.passengers = passengers_that_remain    # update the passengers
 
-        # let new passengers enter
+        # 5. from all passengers in the level, let these enter, who have called the elevator
+        # and are waiting
         for passenger in passengers_of_level:
             if passenger.states["elevator_called"]:
                 passenger.enter_elevator()
                 self.passengers.append(passenger)
 
-        # stop elevator from moving
+        print(f"all people handled. weight: {self.get_load()}")
+
+        # 6. check for overweight.
+        # when overweight, kick as many people as needed 
+        while self.get_load() > self.capacity:
+            self.passengers[-1].leave_elevator(self.passengers[-1].graphics.x, self.target_level)
+            self.passengers.pop()
+            print(f"OVERWEIGHT! kicked last person. weight: {self.get_load()} / {self.capacity}")
+
+        # 7. remove the old target from the elevator.
+        # if something is still in queue, set this as new target
         self.remove_target()
 
-        # add new targets of the passengers
+        # 8. add all target levels from the passengers to the queue
         for passenger in self.passengers:
             if passenger.target_level not in self.queue:
                 self.add_to_queue(passenger.target_level)

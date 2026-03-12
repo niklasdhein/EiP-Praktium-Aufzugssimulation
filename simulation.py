@@ -36,7 +36,7 @@ seperator_line_rect = pygame.Rect(elevator_controller.get_total_elevators_width(
 
 # create a test passenger
 test_passengers = []
-for i in range(10):
+for i in range(30):
     random_start_level = building.levels[random.randint(0, building.level_count-1)]
     random_target_level = -1
     while True:
