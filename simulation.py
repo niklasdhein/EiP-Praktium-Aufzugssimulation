@@ -36,8 +36,14 @@ seperator_line_rect = pygame.Rect(elevator_controller.get_total_elevators_width(
 
 # create a test passenger
 test_passengers = []
-for i in range(1):
-    test_passengers.append(Passenger(building=building))
+for i in range(50):
+    random_start_level = building.levels[random.randint(0, building.level_count-1)]
+    random_target_level = -1
+    while True:
+        random_target_level = building.levels[random.randint(0, building.level_count-1)]
+        if random_target_level != random_start_level:
+            break
+    test_passengers.append(Passenger(current_level=random_start_level, target_level=random_target_level))
 
 # === game loop ===
 
@@ -55,7 +61,7 @@ while running:
 
     # === calculations ===
 
-    elevator_controller.update_elevators(dt=dt)
+    elevator_controller.update(dt=dt)
     for passenger in test_passengers:
         passenger.update(dt=dt)
 

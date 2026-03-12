@@ -1,7 +1,6 @@
 from building import Building
 
 class Elevator:
-    height = 200
     def __init__(self, elevator_controller: ElevatorController, capacity: int, speed: float) -> None:
         self.elevator_controller = elevator_controller  # parent controller
         self.capacity = capacity    # capacity in kg 
@@ -12,11 +11,10 @@ class Elevator:
         else:
             self.width = 100
 
-        self.level = 0              # tracks the current level of the elevator 
         self.direction = 0          # tracks the direction the elevator is moving 
         self.queue = []             # tracks the target levels
         self.target_level = None    # tracks the level travelling to
-        self.target_y = None        # tracks target y coordinate
+        self.target_y = None        # target y coordinate
 
         self.graphics = None        # stores the pygame object like rect, sprite, ..
 
@@ -30,18 +28,22 @@ class Elevator:
 
         return load
 
-    # passenger enters elevator
-    def enter(self, passenger) -> None:
-        self.passengers.append(passenger)
-        # check if overloaded
-        if self.get_load() > self.capacity:
-            self.passengers.pop()
-            return
-        # add target_level to queue
-        elif passenger.target_level not in self.queue:
-            self.queue.append(passenger.target_level)
-        # passenger is in elevator
-        passenger.state = passenger.in_elevator
+    def enter_passengers(self, passengers: [Passenger]) -> None:
+        for passenger in passengers:
+            if passenger.states["elevator_called"]:
+                passenger.states["in_elevator"] = True
+                self.passengers.append(passenger)
+
+    def handle_arrival_at_target(self) -> None:
+        # remove the call from the level
+        self.target_level.up_pressed = False
+        self.target_level.down_pressed = False
+
+        # load in passengers
+        self.enter_passengers(self.target_level.passengers)
+
+        # stop elevator from moving
+        self.remove_target()
 
     def move_to_target(self, dt: float) -> None:
         """
@@ -52,25 +54,24 @@ class Elevator:
         # move the elevator a bit each frame
         self.graphics.y += self.direction * self.speed * dt
 
-        self.level = (self.elevator_controller.building.bottom_y - self.graphics.y) //\
-            self.elevator_controller.building.levels[0].height
-
         # check if it has arrived
-        if self.direction == -1 and self.graphics.y <= self.target_y\
+        if self.direction == 0\
+        or self.direction == -1 and self.graphics.y <= self.target_y\
         or self.direction == 1 and self.graphics.y >= self.target_y:
-            self.graphics.y = self.target_y
-            self.remove_target()
+            self.graphics.y = self.target_y # prevent clipping
+            self.handle_arrival_at_target()            
 
     def remove_target(self) -> None:
         """
-        Little function, that just clears up variables used to manage travelling
-        to save resources.
+        A target is removed, when the elevator arrives.
         """
+        # remove target from elevator
         self.target_level = None
         self.target_y = None
         self.direction = 0
+        self.queue.pop(0)
 
-    def set_target(self, target_level: int) -> None:
+    def set_target(self, target_level: Level) -> None:
         """
         Calculates the target y postion and sets the target level
         the elevator should travel to.
@@ -78,17 +79,15 @@ class Elevator:
         each level as well as the window height, since the building is
         drawn bottom to top.
         """
-        building = self.elevator_controller.building
-
-        print("target level: " + str(target_level))
-
-        # calculate target y position
-        target_y = building.levels[target_level].graphics.y + building.levels[target_level].height - self.height
-
-        # return if elevator is already at exactly this positon
-        if target_y == self.graphics.y: return
+        target_y = target_level.graphics.y + target_level.graphics.height - self.graphics.height
 
         self.target_level = target_level
         self.target_y = target_y
         if self.graphics.y < self.target_y: self.direction = 1
         elif self.graphics.y > self.target_y: self.direction = -1
+        else: self.direction = 0
+
+    def add_to_queue(self, target_level: Level) -> None:
+        self.queue.append(target_level)
+        if self.target_level == None:
+            self.set_target(self.queue[0])
