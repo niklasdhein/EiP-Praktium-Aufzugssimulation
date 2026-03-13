@@ -1,3 +1,5 @@
+import simulation
+
 import tkinter as tk
 from tkinter import ttk
 
@@ -11,7 +13,13 @@ entry_style.configure("BW.TLabel", foreground="black", background="#646464")
 
 
 def start_simulation():
-    pass
+    simulation.start_simulation(
+        elevator_count=int(elevators.get()), 
+        level_count=int(levels.get()),
+        big_elevator_spawn_probability=float(big_elevator_spawn_probability.get()),
+        elevator_mode=mode.get(),
+        passenger_spawn_rate=float(spawn.get()),
+        passenger_patience=int(patience.get()))
 
 # elevators amount
 ttk.Label(
@@ -37,8 +45,8 @@ ttk.Label(
     text="Portion of big elevators:",
     style = "BW.TLabel"
 ).grid(row=2, column=1, padx=5, pady=5, sticky=tk.E)
-height = ttk.Entry(root)
-height.grid(row=2, column=2, padx=5, pady=5, ipadx=9)
+big_elevator_spawn_probability = ttk.Entry(root)
+big_elevator_spawn_probability.grid(row=2, column=2, padx=5, pady=5, ipadx=9)
 
 #mode
 ttk.Label(

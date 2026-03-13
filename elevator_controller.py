@@ -5,11 +5,12 @@ from elevator import Elevator
 from building import Building
 
 class ElevatorController:
-    def __init__(self, building: Building, speed_multiplier: float) -> None:
+    def __init__(self, building: Building, speed_multiplier: float, elevator_count: int) -> None:
         self.building = building    # parent building
         self.elevators = []         # children elevators
 
-        self.create_random_elevators(speed_multiplier=speed_multiplier)     # fills self.elevators
+        self.create_random_elevators(speed_multiplier=speed_multiplier, 
+        elevator_count=elevator_count)
 
         # stores all elevator calls from all levels.
         # the calls are seperated in up and down calls for later
@@ -33,13 +34,16 @@ class ElevatorController:
         for elevator in self.elevators:
             elevator.update(dt=dt)
 
-    def create_random_elevators(self, speed_multiplier: int=1, margin_x: int=20) -> None:
+    def create_random_elevators(self, 
+    speed_multiplier: int=1, 
+    elevator_count: int=2, 
+    margin_x: int=20) -> None:
         """
         Creates random elevators and set these as children of
         the controller.
         """
         offset_x = 0
-        for i in range(3):
+        for i in range(elevator_count):
             # instantiate the elevator
             random_elevator = Elevator(elevator_controller=self,\
                 capacity=random.randint(400, 1800), speed=100*speed_multiplier)
