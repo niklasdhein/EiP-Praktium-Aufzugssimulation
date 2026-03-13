@@ -12,13 +12,13 @@ from building import Building
 # === simulation method(s) ===
 
 def start_simulation(
-    elevator_count: int, 
-    level_count: int,
-    big_elevator_spawn_probability: float,
-    elevator_mode: str,
-    passenger_spawn_rate: float,
-    passenger_patience: int,
-    speed_multiplier: int=1
+    elevator_count: int=10, 
+    level_count: int=5,
+    big_elevator_spawn_probability: float=0.3,
+    elevator_mode: str="algorithm",     # algorithm, random, pingpong      
+    passenger_spawn_chance: float=100,    # probability / second
+    passenger_patience: int=25,         # seconds
+    speed_multiplier: int=100
     ) -> None:
 
     # == pre sim stuff ==
@@ -36,24 +36,17 @@ def start_simulation(
     # create elevator controller
     elevator_controller = ElevatorController(building=building, 
     speed_multiplier=speed_multiplier, 
-    elevator_count=elevator_count
+    elevator_count=elevator_count,
+    big_elevator_spawn_probability=big_elevator_spawn_probability,
+    elevator_mode=elevator_mode
     )
     building.elevator_controller = elevator_controller
 
     # create a line seperating elevators and rest
     seperator_line_rect = pygame.Rect(elevator_controller.get_total_elevators_width(), 0, 20, height) 
 
-    # create a test passenger
-    test_passengers = []
-    for i in range(70):
-        random_start_level = building.levels[random.randint(0, building.level_count-1)]
-        random_target_level = -1
-        while True:
-            random_target_level = building.levels[random.randint(0, building.level_count-1)]
-            if random_target_level != random_start_level:
-                break
-        test_passengers.append(Passenger(current_level=random_start_level,\
-            target_level=random_target_level, walk_speed=200*speed_multiplier))
+    # prepare list to store spawned passengers in
+    passengers = []
 
 
     # === game loop ===
@@ -72,8 +65,24 @@ def start_simulation(
 
         # === calculations ===
 
+        # spawn passengers
+        if random.random() <= passenger_spawn_chance * dt:
+            random_start_level = building.levels[random.randint(0, building.level_count-1)]
+            random_target_level = random_start_level
+            while random_target_level == random_start_level:
+                random_target_level = building.levels[random.randint(0, building.level_count-1)]
+            passengers.append(Passenger(current_level=random_start_level,
+            target_level=random_target_level,
+            weight=80,
+            walk_speed=200,
+            patience=passenger_patience,
+            speed_multiplier=speed_multiplier))
+
+        # handle elevator updates
         elevator_controller.update(dt=dt)
-        for passenger in test_passengers:
+
+        # handle passenger updates
+        for passenger in passengers:
                 passenger.update(dt=dt)
 
 
@@ -114,14 +123,18 @@ def start_simulation(
         pygame.draw.rect(screen, (200, 200, 200), seperator_line_rect)
 
         # draw passenger
-        for passenger in test_passengers:
+        for passenger in passengers:
             color = None
-            if passenger.states["walking"] and passenger.current_level != passenger.target_level: 
-                color = (200, 0, 0)
+            if passenger.states["walking"] :
+                if passenger.current_level != passenger.target_level:
+                    if not passenger.states["annoyed"]:
+                        color = (100, 0, 0)
+                    else:
+                        color = (255, 0, 0)
+                else:
+                    color = (0, 200, 0)
             elif passenger.states["elevator_called"]: 
                 color = (0, 0, 200)
-            elif passenger.states["walking"] and passenger.current_level == passenger.target_level:
-                color = (0, 200, 0)
             else:
                 color = (0, 0, 0)
             pygame.draw.rect(screen, color, passenger.graphics)
@@ -135,3 +148,8 @@ def start_simulation(
 
 width = 1800
 height = 1500
+
+
+# check if running as main
+if __name__ == "__main__":
+    start_simulation()

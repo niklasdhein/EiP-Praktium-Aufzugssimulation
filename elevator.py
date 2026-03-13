@@ -1,15 +1,19 @@
 from building import Building
 
+import random
+
 class Elevator:
-    def __init__(self, elevator_controller: ElevatorController, capacity: int, speed: float) -> None:
+    def __init__(self, 
+    elevator_controller: ElevatorController, 
+    capacity: int, 
+    speed: float,
+    mode: str) -> None:
         self.elevator_controller = elevator_controller  # parent controller
         self.capacity = capacity    # capacity in kg 
-        self.speed = speed          # speed of the elevator
+        self.speed = speed if self.capacity <= 1000 else speed / 2
+        self.mode = mode
 
-        if self.capacity > 1150:    # Change the width (px) accordingly to capacity
-            self.width = 200
-        else:
-            self.width = 100
+        self.width = 100 if self.capacity <= 1000 else 200
 
         self.direction = 0          # tracks the direction the elevator is moving 
         self.queue = []             # tracks the target levels
@@ -18,7 +22,7 @@ class Elevator:
 
         self.graphics = None        # stores the pygame object like rect, sprite, ..
 
-        self.passengers = []
+        self.passengers = [] 
 
     def get_load(self) -> int:
         load = 0
@@ -58,7 +62,9 @@ class Elevator:
 
         def handle_people_enter() -> None:
             for passenger in passengers_of_level:
-                if passenger.states["elevator_called"] and not passenger.states["in_elevator"]:
+                if passenger.states["elevator_called"] and \
+                    not passenger.states["in_elevator"] and \
+                    not passenger.states["annoyed"]:
                     passenger.enter_elevator()
                     self.passengers.append(passenger)
 
@@ -100,8 +106,12 @@ class Elevator:
         # gets set as new one.
         self.remove_target()
 
-        # 8. add all target levels from the passengers to the queue
-        handle_passenger_targets()
+        # 8. when in algorithm mode respect passenger targets
+        # when in random mode just append a new random target to queue
+        if self.mode == "algorithm":
+            handle_passenger_targets()
+        elif self.mode == "random":
+            self.add_random_level_to_queue()
 
     def move(self, dt: float) -> None:
         self.graphics.y += self.direction * self.speed * dt
@@ -120,7 +130,23 @@ class Elevator:
             # check if it has arrived
             if self.has_arrived_at_target():
                 self.graphics.y = self.target_y
-                self.handle_arrival_at_target()            
+                self.handle_arrival_at_target()
+
+        # pick a target on your own if algorithm mode is disabled
+        elif self.mode != "algorithm":
+            if self.mode == "random":
+                self.add_random_level_to_queue()
+            elif self.mode == "pingpong":
+                building_center_y = self.elevator_controller.building.bottom_y -\
+                    self.elevator_controller.building.level_count *\
+                    self.elevator_controller.building.levels[0].background_gfx.height *\
+                    0.5
+                if self.graphics.y < building_center_y:
+                    self.add_multiple_to_queue(reversed(self.elevator_controller.building.levels))
+                else:
+                    self.add_multiple_to_queue(self.elevator_controller.building.levels)
+            else:
+                print("elevator in unknown mode")
 
     def remove_target(self) -> None:
         """
@@ -149,3 +175,11 @@ class Elevator:
         self.queue.append(target_level)
         if self.target_level == None:
             self.set_target(self.queue[0])
+
+    def add_multiple_to_queue(self, target_levels: [Level]) -> None:
+        self.queue += target_levels
+        if self.target_level == None and len(self.queue) > 0: # in case some idiot sent empty list and queue was empty
+            self.set_target(self.queue[0])
+
+    def add_random_level_to_queue(self) -> None:
+        self.add_to_queue(self.elevator_controller.building.levels[random.randint(0, self.elevator_controller.building.level_count-1)])
