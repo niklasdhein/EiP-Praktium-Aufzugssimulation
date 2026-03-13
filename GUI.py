@@ -17,6 +17,7 @@ def start_simulation():
         elevator_count=int(elevators.get()), 
         level_count=int(levels.get()),
         big_elevator_spawn_probability=float(big_elevator_spawn_probability.get()),
+        speed_multiplier=int(speed_multiplier.get()),
         elevator_mode=mode.get(),
         passenger_spawn_rate=float(spawn.get()),
         passenger_patience=int(patience.get()))
@@ -47,6 +48,15 @@ ttk.Label(
 ).grid(row=2, column=1, padx=5, pady=5, sticky=tk.E)
 big_elevator_spawn_probability = ttk.Entry(root)
 big_elevator_spawn_probability.grid(row=2, column=2, padx=5, pady=5, ipadx=9)
+
+# speed multiplier
+ttk.Label(
+    root,
+    text="Speed multiplier:",
+    style = "BW.TLabel"
+).grid(row=3, column=1, padx=5, pady=5, sticky=tk.E)
+speed_multiplier = ttk.Entry(root)
+speed_multiplier.grid(row=3, column=2, padx=5, pady=5, ipadx=9)
 
 #mode
 ttk.Label(

@@ -15,6 +15,7 @@ def start_simulation(
     elevator_count: int, 
     level_count: int,
     big_elevator_spawn_probability: float,
+    speed_multiplier: int,
     elevator_mode: str,
     passenger_spawn_rate: float,
     passenger_patience: int
