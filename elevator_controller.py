@@ -5,12 +5,20 @@ from elevator import Elevator
 from building import Building
 
 class ElevatorController:
-    def __init__(self, building: Building, speed_multiplier: float, elevator_count: int) -> None:
+    def __init__(self, 
+    building: Building, 
+    speed_multiplier: float, 
+    elevator_count: int,
+    big_elevator_spawn_probability: float,
+    elevator_mode: str) -> None:
         self.building = building    # parent building
         self.elevators = []         # children elevators
+        self.elevator_mode = elevator_mode
 
         self.create_random_elevators(speed_multiplier=speed_multiplier, 
-        elevator_count=elevator_count)
+        elevator_count=elevator_count,
+        big_elevator_spawn_probability=big_elevator_spawn_probability,
+        elevator_mode=elevator_mode)
 
         # stores all elevator calls from all levels.
         # the calls are seperated in up and down calls for later
@@ -25,8 +33,9 @@ class ElevatorController:
         The controller is like the head control-unit of all elevators.
         """
 
-        self.check_for_new_calls()
-        self.try_to_send_elevator_to_call()
+        if self.elevator_mode == "algorithm":
+            self.check_for_new_calls()
+            self.try_to_send_elevator_to_call()
         self.update_elevators(dt=dt)
 
     def update_elevators(self, dt: float) -> None:
@@ -35,8 +44,10 @@ class ElevatorController:
             elevator.update(dt=dt)
 
     def create_random_elevators(self, 
-    speed_multiplier: int=1, 
-    elevator_count: int=2, 
+    speed_multiplier: int, 
+    elevator_count: int, 
+    big_elevator_spawn_probability: float,
+    elevator_mode: str,
     margin_x: int=20) -> None:
         """
         Creates random elevators and set these as children of
@@ -44,9 +55,15 @@ class ElevatorController:
         """
         offset_x = 0
         for i in range(elevator_count):
+            # decide wether big or small elevator
+            capacity = 2000 if random.random() <= big_elevator_spawn_probability else 1000
+
             # instantiate the elevator
-            random_elevator = Elevator(elevator_controller=self,\
-                capacity=random.randint(400, 1800), speed=100*speed_multiplier)
+            random_elevator = Elevator(elevator_controller=self, 
+            speed=100*speed_multiplier,
+            capacity=capacity,
+            mode=elevator_mode
+            )
             
             # instantiate the pygame part
             random_elevator.graphics = pygame.Rect(offset_x, self.building.bottom_y - self.building.levels[0].background_gfx.height\

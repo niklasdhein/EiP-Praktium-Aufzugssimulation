@@ -18,7 +18,7 @@ def start_simulation():
         level_count=int(levels.get()),
         big_elevator_spawn_probability=float(big_elevator_spawn_probability.get()),
         elevator_mode=mode.get(),
-        passenger_spawn_rate=float(spawn.get()),
+        passenger_spawn_chance=float(spawn.get()),
         passenger_patience=int(patience.get()),
         speed_multiplier=int(speed_multiplier.get()))
 
@@ -66,7 +66,7 @@ ttk.Label(
 ).grid(row=0, column=3, padx=5, pady=5, sticky=tk.E)
 mode = ttk.Combobox(
     root,
-    values = ["Random", "Up and Down", "Algorithm"],
+    values = ["random", "pingpong", "algorithm"],
     state="readonly"
 )
 mode.grid(row=0, column=4, padx=5, pady=5)
