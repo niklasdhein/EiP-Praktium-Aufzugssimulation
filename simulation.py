@@ -12,13 +12,13 @@ from building import Building
 # === simulation method(s) ===
 
 def start_simulation(
-    elevator_count: int=10, 
+    elevator_count: int=6, 
     level_count: int=5,
     big_elevator_spawn_probability: float=0.3,
     elevator_mode: str="algorithm",     # algorithm, random, pingpong      
-    passenger_spawn_chance: float=100,    # probability / second
+    passenger_spawn_chance: float=5,    # probability / second
     passenger_patience: int=25,         # seconds
-    speed_multiplier: int=100
+    speed_multiplier: int=10
     ) -> None:
 
     # == pre sim stuff ==
@@ -41,9 +41,6 @@ def start_simulation(
     elevator_mode=elevator_mode
     )
     building.elevator_controller = elevator_controller
-
-    # create a line seperating elevators and rest
-    seperator_line_rect = pygame.Rect(elevator_controller.get_total_elevators_width(), 0, 20, height) 
 
     # prepare list to store spawned passengers in
     passengers = []
@@ -91,36 +88,34 @@ def start_simulation(
         # draw each level 
         for i in range(len(building.levels)):
             pygame.draw.rect(screen, (30, 30, 30) if i % 2 == 0 else (50, 50, 50), building.levels[i].background_gfx)
-            pygame.draw.polygon(screen, 
-            (0, 0, 0) if not building.levels[i].up_pressed else (200, 0, 0),
-            [
-                (elevator_controller.get_total_elevators_width()+100, 
-                building.levels[i].background_gfx.y+80),
-                (elevator_controller.get_total_elevators_width()+120, 
-                building.levels[i].background_gfx.y+80),
-                (elevator_controller.get_total_elevators_width()+110, 
-                building.levels[i].background_gfx.y+55)
-            ])
-            pygame.draw.polygon(screen,
-            (0, 0, 0) if not building.levels[i].down_pressed else (200, 0, 0),
-            [    
-                (elevator_controller.get_total_elevators_width()+120, 
-                building.levels[i].background_gfx.y+55),
-                (elevator_controller.get_total_elevators_width()+140, 
-                building.levels[i].background_gfx.y+55),
-                (elevator_controller.get_total_elevators_width()+130, 
-                building.levels[i].background_gfx.y+80)
-            ]
-            )
+            for elevator in elevator_controller.elevators[:-1]:
+                pygame.draw.polygon(screen, 
+                (0, 0, 0) if not building.levels[i].up_pressed else (200, 0, 0),
+                [
+                    (elevator.graphics.x+elevator.graphics.width+(elevator_controller.elevator_margin_x-40)/2, 
+                    building.levels[i].background_gfx.y+100),
+                    (elevator.graphics.x+elevator.graphics.width+20+(elevator_controller.elevator_margin_x-40)/2, 
+                    building.levels[i].background_gfx.y+100),
+                    (elevator.graphics.x+elevator.graphics.width+10+(elevator_controller.elevator_margin_x-40)/2, 
+                    building.levels[i].background_gfx.y+75)
+                ])
+                pygame.draw.polygon(screen,
+                (0, 0, 0) if not building.levels[i].down_pressed else (200, 0, 0),
+                [    
+                    (elevator.graphics.x+elevator.graphics.width+20+(elevator_controller.elevator_margin_x-40)/2, 
+                    building.levels[i].background_gfx.y+75),
+                    (elevator.graphics.x+elevator.graphics.width+40+(elevator_controller.elevator_margin_x-40)/2, 
+                    building.levels[i].background_gfx.y+75),
+                    (elevator.graphics.x+elevator.graphics.width+30+(elevator_controller.elevator_margin_x-40)/2, 
+                    building.levels[i].background_gfx.y+100)
+                ]
+                )
 
         # draw the elevators
         for e in elevator_controller.elevators:
             pygame.draw.rect(screen, 
             (255, 255, 255) if e.target_level != None else (0, 0, 200), 
             e.graphics)
-
-        # draw a line seperating elevators and rest of level
-        pygame.draw.rect(screen, (200, 200, 200), seperator_line_rect)
 
         # draw passenger
         for passenger in passengers:
