@@ -12,13 +12,13 @@ from building import Building
 # === simulation method(s) ===
 
 def start_simulation(
-    elevator_count: int=1, 
+    elevator_count: int=10, 
     level_count: int=5,
     big_elevator_spawn_probability: float=0.3,
-    elevator_mode: str="random",        # todo  
-    passenger_spawn_chance: float=0.1,
+    elevator_mode: str="algorithm",     # algorithm, random, pingpong      
+    passenger_spawn_chance: float=100,    # probability / second
     passenger_patience: int=25,         # seconds
-    speed_multiplier: int=3
+    speed_multiplier: int=100
     ) -> None:
 
     # == pre sim stuff ==

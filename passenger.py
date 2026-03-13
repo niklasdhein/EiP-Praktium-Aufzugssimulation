@@ -17,7 +17,7 @@ class Passenger:
         self.patience = patience
 
         self.walk_target_x = self.current_level.building.elevator_controller.get_total_elevators_width() + 20
-        self.walk_speed = walk_speed * speed_multiplier
+        self.walk_speed = walk_speed
         self.walk_direction = -1
 
         self.states = {
