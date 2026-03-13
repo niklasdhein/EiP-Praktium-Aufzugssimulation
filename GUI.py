@@ -20,7 +20,9 @@ def start_simulation():
         speed_multiplier=int(speed_multiplier.get()),
         elevator_mode=mode.get(),
         passenger_spawn_rate=float(spawn.get()),
-        passenger_patience=int(patience.get()))
+        passenger_patience=int(patience.get()),
+        #simulation_time=int(simulation_time.get())
+    )
 
 # elevators amount
 ttk.Label(
@@ -89,6 +91,15 @@ ttk.Label(
 ).grid(row=2, column=3, padx=5, pady=5, sticky=tk.E)
 patience = ttk.Entry(root)
 patience.grid(row=2, column=4, padx=5, pady=5, ipadx=9)
+
+# simulation time
+ttk.Label(
+    root,
+    text="Simulation time:",
+    style = "BW.TLabel"
+).grid(row=3, column=3, padx=5, pady=5, sticky=tk.E)
+simulation_time = ttk.Entry(root)
+simulation_time.grid(row=3, column=4, padx=5, pady=5, ipadx=9)
 
 # start
 start = ttk.Button(
