@@ -15,6 +15,7 @@ class ElevatorController:
         self.elevators = []         # children elevators
         self.elevator_mode = elevator_mode
 
+        self.elevator_margin_x = 100
         self.create_random_elevators(speed_multiplier=speed_multiplier, 
         elevator_count=elevator_count,
         big_elevator_spawn_probability=big_elevator_spawn_probability,
@@ -47,8 +48,7 @@ class ElevatorController:
     speed_multiplier: int, 
     elevator_count: int, 
     big_elevator_spawn_probability: float,
-    elevator_mode: str,
-    margin_x: int=20) -> None:
+    elevator_mode: str) -> None:
         """
         Creates random elevators and set these as children of
         the controller.
@@ -72,7 +72,7 @@ class ElevatorController:
                 * random.randint(0, self.building.level_count-1) - 200, 
                 random_elevator.width, 
                 200)
-            offset_x += random_elevator.width + margin_x
+            offset_x += random_elevator.width + self.elevator_margin_x
 
             self.elevators.append(random_elevator)
 
@@ -102,7 +102,7 @@ class ElevatorController:
             elif level.down_pressed and level not in self.elevator_calls["down"] and not self.any_elevator_has_level_in_queue(level):
                 self.elevator_calls["down"].append(level)
 
-    def get_total_elevators_width(self, margin_x: int=20) -> int:
+    def get_total_elevators_width(self) -> int:
         """
         Calculates the width in px all elevators need and
         returns it.
@@ -110,7 +110,7 @@ class ElevatorController:
         width = 0
         for elevator in self.elevators:
             width += elevator.graphics.width
-        width += margin_x * (len(self.elevators)-1)
+        width += self.elevator_margin_x * (len(self.elevators)-1)
         return width
 
     def any_elevator_has_level_in_queue(self, level: Level) -> bool:
