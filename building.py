@@ -1,4 +1,7 @@
+from level import Level
+
 import pygame
+
 class Building:
     def __init__(self, level_count: int, bottom_y: int, width: int) -> None:
         self.width = width          # width of building

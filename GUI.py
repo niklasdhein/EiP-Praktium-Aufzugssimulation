@@ -17,10 +17,10 @@ def start_simulation():
         elevator_count=int(elevators.get()), 
         level_count=int(levels.get()),
         big_elevator_spawn_probability=float(big_elevator_spawn_probability.get()),
-        speed_multiplier=int(speed_multiplier.get()),
         elevator_mode=mode.get(),
         passenger_spawn_rate=float(spawn.get()),
-        passenger_patience=int(patience.get()))
+        passenger_patience=int(patience.get()),
+        speed_multiplier=int(speed_multiplier.get()))
 
 # elevators amount
 ttk.Label(
