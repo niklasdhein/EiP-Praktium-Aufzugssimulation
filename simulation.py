@@ -18,7 +18,8 @@ def start_simulation(
     elevator_mode: str="algorithm",     # algorithm, random, pingpong      
     passenger_spawn_chance: float=100,    # probability / second
     passenger_patience: int=25,         # seconds
-    speed_multiplier: int=100
+    speed_multiplier: int=100,
+    simulation_time: int=1000           #seconds
     ) -> None:
 
     # == pre sim stuff ==
@@ -52,6 +53,7 @@ def start_simulation(
     # === game loop ===
 
     running = True
+    time_elapsed = 0
     while running:
         # calculates delta time
         dt = clock.tick(60) / 1000.0
@@ -61,6 +63,9 @@ def start_simulation(
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+
+        time_elapsed += dt
+        if time_elapsed >= simulation_time: running = False
 
 
         # === calculations ===
