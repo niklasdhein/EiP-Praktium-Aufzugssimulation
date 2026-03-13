@@ -15,10 +15,10 @@ def start_simulation(
     elevator_count: int, 
     level_count: int,
     big_elevator_spawn_probability: float,
-    speed_multiplier: int,
     elevator_mode: str,
     passenger_spawn_rate: float,
-    passenger_patience: int
+    passenger_patience: int,
+    speed_multiplier: int=1
     ) -> None:
 
     # == pre sim stuff ==
@@ -135,4 +135,3 @@ def start_simulation(
 
 width = 1800
 height = 1500
-speed_multiplier = 5
