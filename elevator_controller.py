@@ -5,11 +5,11 @@ from elevator import Elevator
 from building import Building
 
 class ElevatorController:
-    def __init__(self, building: Building) -> None:
+    def __init__(self, building: Building, speed_multiplier: float) -> None:
         self.building = building    # parent building
         self.elevators = []         # children elevators
 
-        self.create_random_elevators()  # fills self.elevators
+        self.create_random_elevators(speed_multiplier=speed_multiplier)     # fills self.elevators
 
         # stores all elevator calls from all levels.
         # the calls are seperated in up and down calls for later
@@ -26,24 +26,23 @@ class ElevatorController:
 
         self.check_for_new_calls()
         self.try_to_send_elevator_to_call()
-        self.let_all_elevators_move(dt=dt)
+        self.update_elevators(dt=dt)
 
-    def let_all_elevators_move(self, dt: float) -> None:
-        # move elevators if they have a target
+    def update_elevators(self, dt: float) -> None:
+        # call update for every elevator
         for elevator in self.elevators:
-            if elevator.target_level != None:
-                elevator.move_to_target(dt)
+            elevator.update(dt=dt)
 
-    def create_random_elevators(self, margin_x: int=20) -> None:
+    def create_random_elevators(self, speed_multiplier: int=1, margin_x: int=20) -> None:
         """
         Creates random elevators and set these as children of
         the controller.
         """
         offset_x = 0
-        for i in range(random.randint(3, 3)):
+        for i in range(3):
             # instantiate the elevator
-            random_elevator = Elevator(elevator_controller=self, capacity=random.randint(300, 2500), speed=500)
-            # random_elevator.level = random.randint(0, self.building.level_count-1)
+            random_elevator = Elevator(elevator_controller=self,\
+                capacity=random.randint(400, 1800), speed=100*speed_multiplier)
             
             # instantiate the pygame part
             random_elevator.graphics = pygame.Rect(offset_x, self.building.bottom_y - self.building.levels[0].background_gfx.height\

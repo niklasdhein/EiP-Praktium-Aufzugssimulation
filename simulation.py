@@ -12,7 +12,8 @@ from building import Building
 # === vars ===
 
 width = 1800
-height = 1500 
+height = 1500
+speed_multiplier = 5
 
 # initialize pygame
 pygame.init()
@@ -28,7 +29,7 @@ clock = pygame.time.Clock()
 building = Building(level_count=5, bottom_y=height, width=width)
 
 # create elevator controller
-elevator_controller = ElevatorController(building=building)
+elevator_controller = ElevatorController(building=building, speed_multiplier=speed_multiplier)
 building.elevator_controller = elevator_controller
 
 # create a line seperating elevators and rest
@@ -36,14 +37,15 @@ seperator_line_rect = pygame.Rect(elevator_controller.get_total_elevators_width(
 
 # create a test passenger
 test_passengers = []
-for i in range(30):
+for i in range(70):
     random_start_level = building.levels[random.randint(0, building.level_count-1)]
     random_target_level = -1
     while True:
         random_target_level = building.levels[random.randint(0, building.level_count-1)]
         if random_target_level != random_start_level:
             break
-    test_passengers.append(Passenger(current_level=random_start_level, target_level=random_target_level))
+    test_passengers.append(Passenger(current_level=random_start_level,\
+        target_level=random_target_level, walk_speed=200*speed_multiplier))
 
 # === game loop ===
 
@@ -63,7 +65,7 @@ while running:
 
     elevator_controller.update(dt=dt)
     for passenger in test_passengers:
-        passenger.update(dt=dt)
+            passenger.update(dt=dt)
 
 
     # === draw ===
@@ -104,9 +106,16 @@ while running:
 
     # draw passenger
     for passenger in test_passengers:
-        pygame.draw.rect(screen, 
-        (255, 0, 0) if passenger.states["walking"] else (255, 255, 255), 
-        passenger.graphics)
+        color = None
+        if passenger.states["walking"] and passenger.current_level != passenger.target_level: 
+            color = (200, 0, 0)
+        elif passenger.states["elevator_called"]: 
+            color = (0, 0, 200)
+        elif passenger.states["walking"] and passenger.current_level == passenger.target_level:
+            color = (0, 200, 0)
+        else:
+            color = (0, 0, 0)
+        pygame.draw.rect(screen, color, passenger.graphics)
 
     # draw onto window
     pygame.display.flip()

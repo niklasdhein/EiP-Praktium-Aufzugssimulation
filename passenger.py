@@ -2,14 +2,14 @@ import pygame
 import random
 
 class Passenger:
-    def __init__(self, current_level: Level, target_level: Level, weight: int=150) -> None:
+    def __init__(self, current_level: Level, target_level: Level, weight: int=80, walk_speed=200) -> None:
         self.current_level = current_level          # level the passenger is in currently
         self.current_level.passengers.append(self)
         self.target_level = target_level            # level the passenger wants to travel to
         self.weight = weight
 
         self.walk_target_x = self.current_level.building.elevator_controller.get_total_elevators_width() + 20
-        self.walk_speed = 500
+        self.walk_speed = walk_speed
         self.walk_direction = -1
 
         self.states = {
@@ -65,6 +65,8 @@ class Passenger:
             self.walk_direction = 0
             self.walk_target_x = None          
             self.states["walking"] = False
+            if self.current_level == self.target_level:
+                del self
 
     def update(self, dt: float) -> None:
         """
@@ -76,10 +78,10 @@ class Passenger:
             self.move_to_target_x(dt=dt)
 
         # call elevator
-        elif not self.states["elevator_called"] and not self.states["walking"] and not self.states["in_elevator"]:
+        elif not self.states["elevator_called"] and\
+            not self.states["in_elevator"] and\
+            self.current_level != self.target_level:
             self.states["elevator_called"] = True
-
-            print("called elevator!")
 
             # decide wether travel up or down
             if self.target_level.level > self.current_level.level:
