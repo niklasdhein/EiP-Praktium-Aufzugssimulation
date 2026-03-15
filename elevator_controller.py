@@ -7,7 +7,6 @@ from building import Building
 class ElevatorController:
     def __init__(self, 
     building: Building, 
-    speed_multiplier: float, 
     elevator_count: int,
     big_elevator_spawn_probability: float,
     elevator_mode: str) -> None:
@@ -16,8 +15,7 @@ class ElevatorController:
         self.elevator_mode = elevator_mode
 
         self.elevator_margin_x = 100
-        self.create_random_elevators(speed_multiplier=speed_multiplier, 
-        elevator_count=elevator_count,
+        self.create_random_elevators(elevator_count=elevator_count,
         big_elevator_spawn_probability=big_elevator_spawn_probability,
         elevator_mode=elevator_mode)
 
@@ -29,7 +27,7 @@ class ElevatorController:
             "down": []
         }
 
-    def update(self, dt: float) -> None:
+    def update(self, dt: float, speed_multiplier: float) -> None:
         """
         The controller is like the head control-unit of all elevators.
         """
@@ -37,15 +35,14 @@ class ElevatorController:
         if self.elevator_mode == "algorithm":
             self.check_for_new_calls()
             self.try_to_send_elevator_to_call()
-        self.update_elevators(dt=dt)
+        self.update_elevators(dt=dt, speed_multiplier=speed_multiplier)
 
-    def update_elevators(self, dt: float) -> None:
+    def update_elevators(self, dt: float, speed_multiplier: float) -> None:
         # call update for every elevator
         for elevator in self.elevators:
-            elevator.update(dt=dt)
+            elevator.update(dt=dt, speed_multiplier=speed_multiplier)
 
     def create_random_elevators(self, 
-    speed_multiplier: int, 
     elevator_count: int, 
     big_elevator_spawn_probability: float,
     elevator_mode: str) -> None:
@@ -60,16 +57,17 @@ class ElevatorController:
 
             # instantiate the elevator
             random_elevator = Elevator(elevator_controller=self, 
-            speed=100*speed_multiplier,     # if the speed is too slow and framerate too high the steps get too small for pygame to handle. be careful
+            speed=100,          # if the speed is too slow and framerate too high the steps get too small for pygame to handle. be careful
             capacity=capacity,
-            mode=elevator_mode
+            mode=elevator_mode,
+            current_level=self.building.levels[random.randint(0, self.building.level_count-1)]
             )
             
             # instantiate the pygame part
             random_elevator.graphics = pygame.Rect(
                 offset_x, 
-                self.building.bottom_y - self.building.levels[0].background_gfx.height\
-                * random.randint(0, self.building.level_count-1) - 200, 
+                self.building.bottom_y - random_elevator.current_level.background_gfx.height\
+                * random_elevator.current_level.level - 200, 
                 random_elevator.width, 
                 200)
             offset_x += random_elevator.width + self.elevator_margin_x

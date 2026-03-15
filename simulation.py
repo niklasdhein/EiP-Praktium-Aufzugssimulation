@@ -19,14 +19,14 @@ target_framerate = 60
 # === simulation method(s) ===
 
 def start_simulation(
-    elevator_count: int=3, 
+    elevator_count: int=1, 
     level_count: int=4,
     big_elevator_spawn_probability: float=0.3,
     elevator_mode: str="algorithm",     # algorithm, random, pingpong      
-    passenger_spawn_chance: float=1,    # probability / second
+    passenger_spawn_chance: float=0.1,    # probability / second
     passenger_patience: int=25,         # seconds
-    speed_multiplier: int=10,
-    simulation_time: int=60           #seconds
+    speed_multiplier: int=4,
+    simulation_time: int=3600           #seconds
     ) -> None:
 
     # == pre sim stuff ==
@@ -43,7 +43,6 @@ def start_simulation(
 
     # create elevator controller
     elevator_controller = ElevatorController(building=building, 
-    speed_multiplier=speed_multiplier, 
     elevator_count=elevator_count,
     big_elevator_spawn_probability=big_elevator_spawn_probability,
     elevator_mode=elevator_mode
@@ -88,7 +87,7 @@ def start_simulation(
             speed_multiplier=speed_multiplier))
 
         # handle elevator updates
-        elevator_controller.update(dt=dt)
+        elevator_controller.update(dt=dt, speed_multiplier=speed_multiplier)
 
         # handle passenger updates
         for passenger in passengers:

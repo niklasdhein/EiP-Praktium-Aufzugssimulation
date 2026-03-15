@@ -7,11 +7,13 @@ class Elevator:
     elevator_controller: ElevatorController, 
     capacity: int, 
     speed: float,
-    mode: str) -> None:
+    mode: str,
+    current_level: Level) -> None:
         self.elevator_controller = elevator_controller  # parent controller
         self.capacity = capacity    # capacity in kg 
         self.speed = speed if self.capacity <= 1000 else speed // 2
         self.mode = mode
+        self.current_level = current_level
 
         self.width = 100 if self.capacity <= 1000 else 200
 
@@ -20,7 +22,8 @@ class Elevator:
         self.target_level = None    # tracks the level travelling to
         self.target_y = None        # target y coordinate
 
-        self.waittime = 8           # seconds of doors opened
+        self.waittime = 7.5         # seconds of doors opened
+        self.time_elapsed = 0
 
         self.graphics = None        # stores the pygame object like rect, sprite, ..
 
@@ -63,14 +66,6 @@ class Elevator:
                     passengers_that_remain.append(passenger)
             self.passengers = passengers_that_remain    # update the passengers
 
-        def handle_people_enter() -> None:
-            for passenger in passengers_of_level:
-                if passenger.states["elevator_called"] and \
-                    not passenger.states["in_elevator"] and \
-                    not passenger.states["annoyed"]:
-                    passenger.enter_elevator()
-                    self.passengers.append(passenger)
-
         def handle_overweight() -> None:
             while self.get_load() > self.capacity:
                 self.passengers[-1].leave_elevator(self.passengers[-1].graphics.x, self.target_level)
@@ -81,65 +76,77 @@ class Elevator:
                 if passenger.target_level not in self.queue:
                     self.add_to_queue(passenger.target_level)
 
-        # 1. when the elevator arrives at a level, remove 
+        # 1. sets current level to the reached target
+        self.current_level = self.target_level
+
+        # 2. when the elevator arrives at a level, remove 
         # the call from the level for the elevator
         remove_calls_from_level()
 
-        # 2. if an elevator arrives at a level with a call, but the elevator was not
+        # 3. if an elevator arrives at a level with a call, but the elevator was not
         # called by this level and holds because he drops people of,
         # then take them in and remove 
         smart_remove_controller_call()
-
-        # 3. get all passengers on the level arrived
-        passengers_of_level = self.target_level.passengers
 
         # 4. drop off all people who want to exit on that level
         # and also update the list of people still in the elevator
         handle_people_exit()
 
-        # 5. from all passengers in the level, let these enter, who have called the elevator
-        # and are waiting
-        handle_people_enter()
-
-        # 6. check for overweight.
+        # 5. check for overweight.
         # when overweight, kick as many people as needed 
         handle_overweight()
 
-        # 7. removes old elevator target, if a target is in queue it
-        # gets set as new one.
+        # 6. removes old elevator target
         self.remove_target()
 
-        # 8. when in algorithm mode respect passenger targets
+        # 7. when in algorithm mode respect passenger targets
         # when in random mode just append a new random target to queue
         if self.mode == "algorithm":
             handle_passenger_targets()
         elif self.mode == "random":
             self.add_random_level_to_queue()
 
-    def move(self, dt: float) -> None:
+    def move(self, dt: float, speed_multiplier: float) -> None:
         # print(f"moving by {self.direction * self.speed * dt}")
-        self.graphics.y += self.direction * self.speed * dt
+        self.graphics.y += self.direction * self.speed * speed_multiplier * dt
 
     def has_arrived_at_target(self) -> bool:
-        return self.direction == 0\
-            or self.direction == -1 and self.graphics.y <= self.target_y\
-            or self.direction == 1 and self.graphics.y >= self.target_y
+        # returns true if either was moving and reached the target or
+        # is not moving but already is at target
+        return self.direction == -1 and self.graphics.y <= self.target_y\
+            or self.direction == 1 and self.graphics.y >= self.target_y\
+            or self.direction == 0 and self.graphics.y == self.target_y
 
-    def update(self, dt: float) -> None:
-        # only move the elevator if it has a target
-        if self.target_level != None:
-            # move the elevator a bit each frame
-            self.move(dt=dt)
+    def update(self, dt: float, speed_multiplier: float) -> None:
+        # only move if an elevator has waited long enough
+        if self.time_elapsed >= self.waittime:
+            self.move(dt=dt, speed_multiplier=speed_multiplier)
+        
+        # while waiting with doors opened, check for new passangers
+        # to enter
+        else:
+            passengers_of_level = self.current_level.passengers
+            for passenger in passengers_of_level:
+                if passenger.states["elevator_called"] and \
+                    not passenger.states["in_elevator"] and \
+                    not passenger.states["annoyed"]:
+                    passenger.enter_elevator()
+                    self.passengers.append(passenger)
 
-            # check if it has arrived
-            if self.has_arrived_at_target():
-                self.graphics.y = self.target_y
-                self.handle_arrival_at_target()
+        # procedure called the moment an elevator arrives
+        if self.has_arrived_at_target():
+            self.graphics.y = self.target_y
+            self.handle_arrival_at_target()
+            self.time_elapsed = 0
+        
+        # if not at target yet, increase time_elapsed count
+        else:
+            self.time_elapsed += dt * speed_multiplier
 
         # pick a target on your own if algorithm mode is disabled
         # when algorithm mode is enabled targets will get sent by the controller
         # and set by passengers
-        elif self.mode != "algorithm":
+        """elif self.mode != "algorithm":
             if self.mode == "random":
                 self.add_random_level_to_queue()
             elif self.mode == "pingpong":
@@ -152,20 +159,17 @@ class Elevator:
                 else:
                     self.add_multiple_to_queue(self.elevator_controller.building.levels)
             else:
-                print("elevator in unknown mode")
+                print("elevator in unknown mode")"""
 
     def remove_target(self) -> None:
         """
         A target is removed, when the elevator arrives.
         """
-        # remove target from elevator
+        # resets current target and deletes it from the queue
         self.target_level = None
         self.target_y = None
         self.direction = 0
-
         self.queue.pop(0)
-        if len(self.queue) > 0: 
-            self.set_target(self.queue[0])
 
     def set_target(self, target_level: Level) -> None:
         target_y = target_level.background_gfx.y + target_level.background_gfx.height - self.graphics.height
@@ -176,6 +180,11 @@ class Elevator:
         if self.graphics.y < self.target_y: self.direction = 1
         elif self.graphics.y > self.target_y: self.direction = -1
         else: self.direction = 0
+
+        """print(f"got new target level: {self.target_level.level}")
+        print("- queue -")
+        for q in self.queue:
+            print(f"\t[ {q.level} ]")"""
 
     def add_to_queue(self, target_level: Level) -> None:
         self.queue.append(target_level)
