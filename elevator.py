@@ -20,6 +20,8 @@ class Elevator:
         self.target_level = None    # tracks the level travelling to
         self.target_y = None        # target y coordinate
 
+        self.waittime = 8           # seconds of doors opened
+
         self.graphics = None        # stores the pygame object like rect, sprite, ..
 
         self.passengers = [] 
@@ -55,7 +57,8 @@ class Elevator:
             passengers_that_remain = []
             for passenger in self.passengers:
                 if self.target_level == passenger.target_level:     # kick out passengers at target
-                    passenger.leave_elevator(self.elevator_controller.building.width, self.target_level)
+                    building_width = self.elevator_controller.building.width
+                    passenger.leave_elevator(-30 if random.random() <= 0.5 else building_width, self.target_level)
                 else:
                     passengers_that_remain.append(passenger)
             self.passengers = passengers_that_remain    # update the passengers

@@ -19,13 +19,13 @@ target_framerate = 60
 # === simulation method(s) ===
 
 def start_simulation(
-    elevator_count: int=2, 
+    elevator_count: int=3, 
     level_count: int=4,
     big_elevator_spawn_probability: float=0.3,
     elevator_mode: str="algorithm",     # algorithm, random, pingpong      
     passenger_spawn_chance: float=1,    # probability / second
     passenger_patience: int=25,         # seconds
-    speed_multiplier: int=5,
+    speed_multiplier: int=10,
     simulation_time: int=60           #seconds
     ) -> None:
 
@@ -99,8 +99,11 @@ def start_simulation(
 
         # draw each level 
         for i in range(len(building.levels)):
+            # level background
             pygame.draw.rect(screen, (30, 30, 30) if i % 2 == 0 else (50, 50, 50), building.levels[i].background_gfx)
-            for elevator in elevator_controller.elevators[:-1]:
+
+            # up / down call buttons
+            for elevator in elevator_controller.elevators[:-1]: 
                 pygame.draw.polygon(screen, 
                 (0, 0, 0) if not building.levels[i].up_pressed else (200, 0, 0),
                 [
@@ -149,6 +152,8 @@ def start_simulation(
         # draw onto window
         pygame.display.flip()
     pygame.quit()
+
+    print(f"simulation exited. {time_elapsed:.3f}s elapsed.")
 
 
 # check if running as main

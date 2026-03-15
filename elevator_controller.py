@@ -76,6 +76,11 @@ class ElevatorController:
 
             self.elevators.append(random_elevator)
 
+        # for keeping things pretty, center all elevators
+        start_x = (self.building.width - self.get_total_elevators_width()) // 2
+        for elevator in self.elevators:
+            elevator.graphics.x += start_x
+
     def try_to_send_elevator_to_call(self) -> None:
         # handle which elevator travels to which floor
         for call_up_level in self.elevator_calls["up"]:

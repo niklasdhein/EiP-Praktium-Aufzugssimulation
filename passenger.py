@@ -16,38 +16,40 @@ class Passenger:
 
         self.patience = patience
 
-        self.walk_target_x = self.current_level.building.elevator_controller.get_total_elevators_width() + 20
+        self.walk_target_x = None
         self.walk_speed = walk_speed
-        self.walk_direction = -1
+        self.walk_direction = 0
 
         self.states = {
             "elevator_called": False,
             "annoyed": False,
             "in_elevator": False,
             "using_staircase": False,
-            "walking": True
+            "walking": False
         }
 
         self.graphics = pygame.Rect(
-            random.randint(self.current_level.building.width // 2, self.current_level.building.width * 2), 
+            -30 if random.random() <= 0.5 else self.current_level.building.width, 
             self.current_level.building.bottom_y - self.current_level.level * self.current_level.background_gfx.height - 60,
             30, 
             60
             ) 
 
+        # spawn each passenger with target to walk towards elevators
+        screen_center_x = self.current_level.building.width // 2
+        half_total_elevators_width = self.current_level.building.elevator_controller.get_total_elevators_width() // 2
+        target_x = random.randint(screen_center_x - half_total_elevators_width, screen_center_x + half_total_elevators_width)
+        self.set_target(target_x=target_x)
+
     def leave_elevator(self, target_x: int, new_level: Level) -> None:
         self.states["in_elevator"] = False
-        self.states["walking"] = True
-
         self.current_level = new_level
         new_level.passengers.append(self)
-
         self.graphics.y = self.current_level.background_gfx.y + self.current_level.background_gfx.height - 60
         self.graphics.width = 30
         self.graphics.height = 60
 
-        self.walk_target_x = target_x
-        self.walk_direction = 1
+        self.set_target(target_x=target_x)
 
     def enter_elevator(self) -> None:
         self.current_level.remove_passenger_from_level(self)
