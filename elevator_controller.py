@@ -60,7 +60,7 @@ class ElevatorController:
 
             # instantiate the elevator
             random_elevator = Elevator(elevator_controller=self, 
-            speed=100*speed_multiplier,
+            speed=100*speed_multiplier,     # if the speed is too slow and framerate too high the steps get too small for pygame to handle. be careful
             capacity=capacity,
             mode=elevator_mode
             )

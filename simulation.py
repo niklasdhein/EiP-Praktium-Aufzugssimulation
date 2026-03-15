@@ -9,17 +9,24 @@ from passenger import Passenger
 from building import Building
 
 
+# === vars ===
+
+width = 1600
+height = 1200
+target_framerate = 60    
+
+
 # === simulation method(s) ===
 
 def start_simulation(
-    elevator_count: int=6, 
-    level_count: int=5,
+    elevator_count: int=2, 
+    level_count: int=4,
     big_elevator_spawn_probability: float=0.3,
     elevator_mode: str="algorithm",     # algorithm, random, pingpong      
-    passenger_spawn_chance: float=5,    # probability / second
+    passenger_spawn_chance: float=1,    # probability / second
     passenger_patience: int=25,         # seconds
-    speed_multiplier: int=100,
-    simulation_time: int=1000           #seconds
+    speed_multiplier: int=5,
+    simulation_time: int=60           #seconds
     ) -> None:
 
     # == pre sim stuff ==
@@ -53,7 +60,7 @@ def start_simulation(
     time_elapsed = 0
     while running:
         # calculates delta time
-        dt = clock.tick(60) / 1000.0
+        dt = clock.tick(target_framerate) / 1000.0
         # print(f"FPS: {1/dt}")
 
         # exit when closing the window
@@ -68,7 +75,7 @@ def start_simulation(
         # === calculations ===
 
         # spawn passengers
-        if random.random() <= passenger_spawn_chance * dt:
+        if random.random() <= passenger_spawn_chance * speed_multiplier * dt:
             random_start_level = building.levels[random.randint(0, building.level_count-1)]
             random_target_level = random_start_level
             while random_target_level == random_start_level:
@@ -142,12 +149,6 @@ def start_simulation(
         # draw onto window
         pygame.display.flip()
     pygame.quit()
-
-
-# === vars ===
-
-width = 1800
-height = 1500
 
 
 # check if running as main

@@ -10,7 +10,7 @@ class Elevator:
     mode: str) -> None:
         self.elevator_controller = elevator_controller  # parent controller
         self.capacity = capacity    # capacity in kg 
-        self.speed = speed if self.capacity <= 1000 else speed / 2
+        self.speed = speed if self.capacity <= 1000 else speed // 2
         self.mode = mode
 
         self.width = 100 if self.capacity <= 1000 else 200
@@ -114,6 +114,7 @@ class Elevator:
             self.add_random_level_to_queue()
 
     def move(self, dt: float) -> None:
+        # print(f"moving by {self.direction * self.speed * dt}")
         self.graphics.y += self.direction * self.speed * dt
 
     def has_arrived_at_target(self) -> bool:
@@ -133,6 +134,8 @@ class Elevator:
                 self.handle_arrival_at_target()
 
         # pick a target on your own if algorithm mode is disabled
+        # when algorithm mode is enabled targets will get sent by the controller
+        # and set by passengers
         elif self.mode != "algorithm":
             if self.mode == "random":
                 self.add_random_level_to_queue()
