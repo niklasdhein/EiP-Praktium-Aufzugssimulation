@@ -24,6 +24,7 @@ class Elevator:
 
         self.waittime = 7.5         # seconds of doors opened
         self.time_elapsed = 0
+        self.handled_exit_from_target = False
 
         self.graphics = None        # stores the pygame object like rect, sprite, ..
 
@@ -66,16 +67,6 @@ class Elevator:
                     passengers_that_remain.append(passenger)
             self.passengers = passengers_that_remain    # update the passengers
 
-        def handle_overweight() -> None:
-            while self.get_load() > self.capacity:
-                self.passengers[-1].leave_elevator(self.passengers[-1].graphics.x, self.target_level)
-                self.passengers.pop()
-
-        def handle_passenger_targets() -> None:
-            for passenger in self.passengers:
-                if passenger.target_level not in self.queue:
-                    self.add_to_queue(passenger.target_level)
-
         # 1. sets current level to the reached target
         self.current_level = self.target_level
 
@@ -92,14 +83,25 @@ class Elevator:
         # and also update the list of people still in the elevator
         handle_people_exit()
 
-        # 5. check for overweight.
+        # 5. removes old elevator target
+        self.remove_target()
+
+    def handle_exit_from_target(self) -> None:
+        def handle_overweight() -> None:
+            while self.get_load() > self.capacity:
+                self.passengers[-1].leave_elevator(self.passengers[-1].graphics.x, self.target_level)
+                self.passengers.pop()
+
+        def handle_passenger_targets() -> None:
+            for passenger in self.passengers:
+                if passenger.target_level not in self.queue:
+                    self.add_to_queue(passenger.target_level)
+
+        # 1. check for overweight.
         # when overweight, kick as many people as needed 
         handle_overweight()
 
-        # 6. removes old elevator target
-        self.remove_target()
-
-        # 7. when in algorithm mode respect passenger targets
+        # 2. when in algorithm mode respect passenger targets
         # when in random mode just append a new random target to queue
         if self.mode == "algorithm":
             handle_passenger_targets()
@@ -118,9 +120,22 @@ class Elevator:
             or self.direction == 0 and self.graphics.y == self.target_y
 
     def update(self, dt: float, speed_multiplier: float) -> None:
-        # only move if an elevator has waited long enough
+        # only move if elevator has waited long enough
         if self.time_elapsed >= self.waittime:
+            if not self.handled_exit_from_target:
+                self.handle_exit_from_target()
+                self.handled_exit_from_target = True
+                print(f"handled elevator exit\npassenger-count: {len(self.passengers)}\nnext target: {self.target_level}")
+
             self.move(dt=dt, speed_multiplier=speed_multiplier)
+
+            # handle when elevator is at target
+            if self.has_arrived_at_target():
+                self.graphics.y = self.target_y
+                self.handle_arrival_at_target()
+                self.time_elapsed = 0
+                self.handled_exit_from_target = False
+                print(f"handled elevator enter\npassenger-count: {len(self.passengers)}")
         
         # while waiting with doors opened, check for new passangers
         # to enter
@@ -132,16 +147,9 @@ class Elevator:
                     not passenger.states["annoyed"]:
                     passenger.enter_elevator()
                     self.passengers.append(passenger)
-
-        # procedure called the moment an elevator arrives
-        if self.has_arrived_at_target():
-            self.graphics.y = self.target_y
-            self.handle_arrival_at_target()
-            self.time_elapsed = 0
+                    print("passenger entered")
         
-        # if not at target yet, increase time_elapsed count
-        else:
-            self.time_elapsed += dt * speed_multiplier
+        self.time_elapsed += dt * speed_multiplier
 
         # pick a target on your own if algorithm mode is disabled
         # when algorithm mode is enabled targets will get sent by the controller
