@@ -31,6 +31,9 @@ class Elevator:
 
         self.passengers = [] 
 
+        # statistic variables
+        self.passengers_transported = 0
+
     def get_load(self) -> int:
         load = 0
         # iterate over list of passengers
@@ -78,6 +81,7 @@ class Elevator:
                     if self.current_level == passenger.target_level:     # kick out passengers at target
                         building_width = self.elevator_controller.building.width
                         passenger.leave_elevator(-30 if random.random() <= 0.5 else building_width, self.target_level)
+                        self.passengers_transported += 1
                     else:
                         passengers_that_remain.append(passenger)
                 self.passengers = passengers_that_remain    # update the passengers

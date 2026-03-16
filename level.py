@@ -12,6 +12,9 @@ class Level:
         self.background_gfx = pygame.Rect(0, self.building.bottom_y - (self.level+1) * 250,\
             self.building.width, 250)
 
+        # statistics variables
+        self.passengers_annoyed = 0
+
     def remove_passenger_from_level(self, passenger: Passenger) -> None:
         new_passengers = []
         for p in self.passengers:

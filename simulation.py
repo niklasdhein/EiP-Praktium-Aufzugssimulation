@@ -13,67 +13,30 @@ from building import Building
 
 width = 2500
 height = 1600
-target_framerate = 60    
+target_framerate = 1000    
 
 
 # === simulation method(s) ===
 
 def start_simulation(
-    elevator_count: int=4, 
-    level_count: int=6,
+    elevator_count: int=3, 
+    level_count: int=5,
     big_elevator_spawn_probability: float=0.3,
     elevator_mode: str="algorithm",     # algorithm, random, pingpong      
-    passenger_spawn_chance: float=1,    # probability / second
+    passenger_spawn_chance: float=0.5,    # probability / second
     passenger_patience: int=25,         # seconds
-    speed_multiplier: int=1,
-    simulation_time: int=3600           #seconds
+    speed_multiplier: int=10,
+    simulation_time: int=10           #seconds
     ) -> None:
 
-    # == pre sim stuff ==
 
-    # initialize pygame
-    pygame.init()
+    # == methods used in the simulation ==
 
-    # set appearance
-    screen = pygame.display.set_mode((width, height))
-    clock = pygame.time.Clock()
-
-    # create the building to simulate
-    building = Building(level_count=level_count, bottom_y=height, width=width)
-
-    # create elevator controller
-    elevator_controller = ElevatorController(building=building, 
-    elevator_count=elevator_count,
-    big_elevator_spawn_probability=big_elevator_spawn_probability,
-    elevator_mode=elevator_mode
-    )
-    building.elevator_controller = elevator_controller
-
-    # prepare list to store spawned passengers in
-    passengers = []
-
-
-    # === game loop ===
-
-    running = True
-    time_elapsed = 0
-    while running:
-        # calculates delta time
-        dt = clock.tick(target_framerate) / 1000.0
-        # print(f"FPS: {1/dt}")
-
-        # exit when closing the window
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-
-        time_elapsed += dt
-        if time_elapsed >= simulation_time: running = False
-
-
-        # === calculations ===
-
-        # spawn passengers
+    def spawn_passenger(passengers: list) -> bool:
+        """
+        Spawns to a certain chance a passenger and appends it to the
+        passed array. Also returns wether spawning was a success or not.
+        """
         if random.random() <= passenger_spawn_chance * speed_multiplier * dt:
             random_start_level = building.levels[random.randint(0, building.level_count-1)]
             random_target_level = random_start_level
@@ -83,19 +46,11 @@ def start_simulation(
             target_level=random_target_level,
             weight=80,
             walk_speed=200,
-            patience=passenger_patience,
-            speed_multiplier=speed_multiplier))
+            patience=passenger_patience))
+            return True
+        return False
 
-        # handle elevator updates
-        elevator_controller.update(dt=dt, speed_multiplier=speed_multiplier)
-
-        # handle passenger updates
-        for passenger in passengers:
-                passenger.update(dt=dt)
-
-
-        # === draw ===
-
+    def draw_building() -> None:
         # draw each level 
         for i in range(len(building.levels)):
             # level background
@@ -128,7 +83,7 @@ def start_simulation(
             else:    
                 for elevator in elevator_controller.elevators[:-1]: 
                     pygame.draw.polygon(screen, 
-                    (0, 0, 0) if not building.levels[i].up_pressed else (200, 0, 0),
+                    (0, 0, 0) if not building.levels[i].up_pressed else (100, 0, 0),
                     [
                         (elevator.graphics.x+elevator.graphics.width+(elevator_controller.elevator_margin_x-40)/2, 
                         building.levels[i].background_gfx.y+150),
@@ -138,7 +93,7 @@ def start_simulation(
                         building.levels[i].background_gfx.y+125)
                     ])
                     pygame.draw.polygon(screen,
-                    (0, 0, 0) if not building.levels[i].down_pressed else (200, 0, 0),
+                    (0, 0, 0) if not building.levels[i].down_pressed else (100, 0, 0),
                     [    
                         (elevator.graphics.x+elevator.graphics.width+20+(elevator_controller.elevator_margin_x-40)/2, 
                         building.levels[i].background_gfx.y+125),
@@ -148,7 +103,32 @@ def start_simulation(
                         building.levels[i].background_gfx.y+150)
                     ]
                     )
+            
+            # draw a direction indicator above every elevator
+            for elevator in elevator_controller.elevators:
+                elevator_center_x = elevator.graphics.x + elevator.graphics.width // 2
+                top_y = building.levels[i].background_gfx.y + 5
+                pygame.draw.rect(screen, 
+                (0, 0, 0),
+                pygame.Rect(elevator_center_x-15, top_y, 30, 30))
+                if elevator.direction == 1:
+                    pygame.draw.polygon(screen,
+                    (200, 0, 0),
+                    [
+                        (elevator_center_x-12, top_y),
+                        (elevator_center_x+12, top_y),
+                        (elevator_center_x, top_y+20)
+                    ])
+                elif elevator.direction == -1:
+                    pygame.draw.polygon(screen,
+                    (0, 200, 0),
+                    [
+                        (elevator_center_x-12, top_y+30),
+                        (elevator_center_x+12, top_y+30),
+                        (elevator_center_x, top_y+10)
+                    ])
 
+    def draw_elevators() -> None:
         # draw the elevators
         for e in elevator_controller.elevators:
             # draw each elevator
@@ -159,24 +139,7 @@ def start_simulation(
             # draw door
             pygame.draw.rect(screen, (0, 0, 0), e.door)
 
-            # draw a status of direction the elevator is travelling to
-            if e.direction == 1:
-                pygame.draw.polygon(screen,
-                (200, 0, 0),
-                [
-                    (e.graphics.x+e.graphics.width//2-10, e.graphics.y-30),
-                    (e.graphics.x+e.graphics.width//2+10, e.graphics.y-30),
-                    (e.graphics.x+e.graphics.width//2, e.graphics.y-15)
-                ])
-            elif e.direction == -1:
-                pygame.draw.polygon(screen,
-                (0, 200, 0),
-                [
-                    (e.graphics.x+e.graphics.width//2-10, e.graphics.y-15),
-                    (e.graphics.x+e.graphics.width//2+10, e.graphics.y-15),
-                    (e.graphics.x+e.graphics.width//2, e.graphics.y-30)
-                ])
-
+    def draw_passengers() -> None:
         # draw passenger
         for passenger in passengers:
             color = None
@@ -194,12 +157,96 @@ def start_simulation(
                 color = (0, 0, 200)
             pygame.draw.rect(screen, color, passenger.graphics)
 
-        # draw onto window
+    # == pre sim stuff ==
+
+    # initialize pygame
+    pygame.init()
+
+    # set appearance
+    screen = pygame.display.set_mode((width, height))
+    clock = pygame.time.Clock()
+
+    # create the building to simulate
+    building = Building(level_count=level_count, bottom_y=height, width=width)
+
+    # create elevator controller
+    elevator_controller = ElevatorController(
+    building=building, 
+    elevator_count=elevator_count,
+    big_elevator_spawn_probability=big_elevator_spawn_probability,
+    elevator_mode=elevator_mode
+    )
+    building.elevator_controller = elevator_controller
+
+    # prepare list to store spawned passengers in
+    passengers = []
+
+
+    # == statistic variables ==
+    passengers_transported = 0
+    passengers_annoyed = 0
+    passengers_spawned = 0
+
+
+    # === game loop ===
+
+    running = True
+    time_elapsed = 0
+    while running:
+        # calculates delta time
+        dt = clock.tick(target_framerate) / 1000.0
+        # print(f"FPS: {1/dt}")
+
+        # exit when closing the window
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+        # exit when runtime is over
+        time_elapsed += dt
+        if time_elapsed >= simulation_time: running = False
+
+
+        # === calculations ===
+
+        # spawns with probability a passenger
+        if spawn_passenger(passengers=passengers): passengers_spawned += 1
+
+        # handle elevator updates
+        elevator_controller.update(dt=dt, speed_multiplier=speed_multiplier)
+
+        # handle passenger updates
+        for passenger in passengers:
+            passenger.update(dt=dt, speed_multiplier=speed_multiplier)
+
+
+        # === draw ===
+
+        draw_building()
+        draw_elevators()
+        draw_passengers()
+
+        # draw on window
         pygame.display.flip()
     pygame.quit()
 
     print(f"simulation exited. {time_elapsed:.3f}s elapsed.")
 
+    # some statistics work
+    for e in elevator_controller.elevators:
+        passengers_transported += e.passengers_transported
+    for l in building.levels:
+        passengers_annoyed += l.passengers_annoyed
+    
+    print(f"\n--- statistics ---\
+        \ntransported:\t{passengers_transported} ({passengers_transported/passengers_spawned*100:.2f}%)\
+        \nannoyed:\t{passengers_annoyed} ({passengers_annoyed/passengers_spawned*100:.2f}%)\
+        \nspawned:\t{passengers_spawned}\n\
+        \nelevator mode:\t{elevator_mode}")
+    print("\nelevators in detail:")
+    for i in range(len(elevator_controller.elevators)):
+        transported = elevator_controller.elevators[i].passengers_transported
+        print(f"elevator {i} ({"small" if elevator_controller.elevators[i].capacity <= 1000 else "big"}):\t{transported} ({transported/passengers_spawned*100:.2f}%)")
 
 # check if running as main
 if __name__ == "__main__":

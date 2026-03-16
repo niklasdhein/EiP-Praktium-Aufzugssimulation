@@ -29,9 +29,8 @@ class ElevatorController:
 
     def update(self, dt: float, speed_multiplier: float) -> None:
         """
-        The controller is like the head control-unit of all elevators.
+        The controller is the head control-unit of all elevators.
         """
-
         if self.elevator_mode == "algorithm":
             self.check_for_new_calls()
             self.try_to_send_elevator_to_call()
@@ -95,7 +94,9 @@ class ElevatorController:
             )
 
     def try_to_send_elevator_to_call(self) -> None:
-        # handle which elevator travels to which floor
+        """
+        An elevator is sent to a call, if it has no elements in its queue.
+        """
         for call_up_level in self.elevator_calls["up"]:
             for elevator in self.elevators:
                 if len(elevator.queue) == 0 and elevator.time_elapsed >= elevator.waittime:
@@ -111,13 +112,45 @@ class ElevatorController:
                     break
 
     def check_for_new_calls(self) -> None:
-        # check for elevator calls.
-        # if a elevator was called and the elevator controller did
-        # not yet know about this level it adds it to a list of calls.
-        for level in self.building.levels:
-            if level.up_pressed and level not in self.elevator_calls["up"] and not self.any_elevator_has_level_in_queue(level):
+        """
+        A call is only registered as new, if it is not already registered
+        and no elevator is already moving towards the level. 
+        """
+
+        def any_elevator_has_level_in_queue(level: Level) -> bool:
+            """
+            Checks if any elevator is travelling to that level.
+            """
+            for elevator in self.elevators:
+                if level in elevator.queue:
+                    return True
+            return False
+
+        def any_elevator_is_moving_towards_level(level: Level) -> bool:
+            """
+            Checks if any elevator is travelling towards that level right now.
+            Returns true if so, false otherwise.
+            """
+            for elevator in self.elevators:
+                if level == elevator.target_level:
+                    return True
+            return False
+
+        # old version:
+        # ignored calls from a level if this level was already in the queue of some
+        # elevator
+        """for level in self.building.levels:
+            if level.up_pressed and level not in self.elevator_calls["up"] and not any_elevator_has_level_in_queue(level):
                 self.elevator_calls["up"].append(level)
-            elif level.down_pressed and level not in self.elevator_calls["down"] and not self.any_elevator_has_level_in_queue(level):
+            elif level.down_pressed and level not in self.elevator_calls["down"] and not any_elevator_has_level_in_queue(level):
+                self.elevator_calls["down"].append(level)"""
+
+        # new version:
+        # now only ignore calls if the level is the next target of any elevator
+        for level in self.building.levels:
+            if level.up_pressed and level not in self.elevator_calls["up"] and not any_elevator_is_moving_towards_level(level):
+                self.elevator_calls["up"].append(level)
+            elif level.down_pressed and level not in self.elevator_calls["down"] and not any_elevator_is_moving_towards_level(level):
                 self.elevator_calls["down"].append(level)
 
     def get_total_elevators_width(self) -> int:
@@ -130,12 +163,3 @@ class ElevatorController:
             width += elevator.graphics.width
         width += self.elevator_margin_x * (len(self.elevators)-1)
         return width
-
-    def any_elevator_has_level_in_queue(self, level: Level) -> bool:
-        """
-        Checks if any elevator is travelling to that level.
-        """
-        for elevator in self.elevators:
-            if level in elevator.queue:
-                return True
-        return False

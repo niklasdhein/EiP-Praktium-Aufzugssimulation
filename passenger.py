@@ -2,23 +2,20 @@ import pygame
 import random
 
 class Passenger:
-    def __init__(self, current_level: Level, 
+    def __init__(self, 
+    current_level: Level, 
     target_level: Level,
     patience: int,  
     weight: int, 
-    walk_speed,
-    speed_multiplier) -> None:
+    walk_speed: int) -> None:
         self.current_level = current_level          # level the passenger is in currently
-        self.current_level.passengers.append(self)
         self.target_level = target_level            # level the passenger wants to travel to
-        self.weight = weight
-        self.speed_multiplier = speed_multiplier
-
         self.patience = patience
-        self.current_patience = self.patience
-
-        self.walk_target_x = None
+        self.weight = weight
         self.walk_speed = walk_speed
+        
+        self.current_patience = self.patience
+        self.walk_target_x = None
         self.walk_direction = 0
 
         self.states = {
@@ -28,6 +25,8 @@ class Passenger:
             "using_staircase": False,
             "walking": False
         }
+
+        self.current_level.passengers.append(self)
 
         self.graphics = pygame.Rect(
             -30 if random.random() <= 0.5 else self.current_level.building.width, 
@@ -61,13 +60,13 @@ class Passenger:
 
         self.set_target(target_x=target_x)
 
-    def move_to_target_x(self, dt: float) -> None:
+    def move_to_target_x(self, dt: float, speed_multiplier: float) -> None:
         """
         Moves the passenger towards its target.
         Does not check if a target is actually set.
         Checks if target is reached.
         """
-        self.graphics.x += self.walk_direction * self.walk_speed * self.speed_multiplier * dt
+        self.graphics.x += self.walk_direction * self.walk_speed * speed_multiplier * dt
         
         # target reached
         if self.walk_direction == -1 and self.graphics.x <= self.walk_target_x\
@@ -91,14 +90,14 @@ class Passenger:
         elif self.walk_target_x < self.graphics.x: self.walk_direction = -1
         else: self.remove_target()
 
-    def update(self, dt: float) -> None:
+    def update(self, dt: float, speed_multiplier: float) -> None:
         """
         Updates the passengers action according to the state he is in.
         """
 
         # walk to the elevator
         if self.states["walking"]:
-            self.move_to_target_x(dt=dt)
+            self.move_to_target_x(dt=dt, speed_multiplier=speed_multiplier)
 
         # call elevator
         elif not self.states["elevator_called"] and\
@@ -116,7 +115,8 @@ class Passenger:
         elif self.states["elevator_called"] and\
             not self.states["in_elevator"] and\
             self.current_level != self.target_level:
-            self.current_patience -= dt * self.speed_multiplier
+            self.current_patience -= dt * speed_multiplier
             if self.current_patience <= 0 and not self.states["annoyed"]:
                 self.states["annoyed"] = True
                 self.set_target(self.current_level.building.width)
+                self.current_level.passengers_annoyed += 1
