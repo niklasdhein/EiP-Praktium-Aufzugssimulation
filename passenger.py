@@ -15,6 +15,7 @@ class Passenger:
         self.speed_multiplier = speed_multiplier
 
         self.patience = patience
+        self.current_patience = self.patience
 
         self.walk_target_x = None
         self.walk_speed = walk_speed
@@ -43,6 +44,8 @@ class Passenger:
 
     def leave_elevator(self, target_x: int, new_level: Level) -> None:
         self.states["in_elevator"] = False
+        self.states["elevator_called"] = False
+        self.current_patience = self.patience
         self.current_level = new_level
         new_level.passengers.append(self)
         self.graphics.y = self.current_level.background_gfx.y + self.current_level.background_gfx.height - 60
@@ -114,7 +117,7 @@ class Passenger:
         elif self.states["elevator_called"] and\
             not self.states["in_elevator"] and\
             self.current_level != self.target_level:
-            self.patience -= dt * self.speed_multiplier
-            if self.patience <= 0 and not self.states["annoyed"]:
+            self.current_patience -= dt * self.speed_multiplier
+            if self.current_patience <= 0 and not self.states["annoyed"]:
                 self.states["annoyed"] = True
                 self.set_target(self.current_level.building.width)

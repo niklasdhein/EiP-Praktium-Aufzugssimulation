@@ -83,14 +83,14 @@ class ElevatorController:
         # handle which elevator travels to which floor
         for call_up_level in self.elevator_calls["up"]:
             for elevator in self.elevators:
-                if len(elevator.queue) == 0:
+                if len(elevator.queue) == 0 and elevator.time_elapsed >= elevator.waittime:
                     elevator.add_to_queue(call_up_level)
                     self.elevator_calls["up"].pop(0)
                     break
 
         for call_down_level in self.elevator_calls["down"]:
             for elevator in self.elevators:
-                if len(elevator.queue) == 0:
+                if len(elevator.queue) == 0 and elevator.time_elapsed >= elevator.waittime:
                     elevator.add_to_queue(call_down_level)
                     self.elevator_calls["down"].pop(0)
                     break

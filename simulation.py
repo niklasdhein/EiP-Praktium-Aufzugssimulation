@@ -19,13 +19,13 @@ target_framerate = 60
 # === simulation method(s) ===
 
 def start_simulation(
-    elevator_count: int=1, 
+    elevator_count: int=6, 
     level_count: int=4,
     big_elevator_spawn_probability: float=0.3,
     elevator_mode: str="algorithm",     # algorithm, random, pingpong      
-    passenger_spawn_chance: float=0.1,    # probability / second
+    passenger_spawn_chance: float=5,    # probability / second
     passenger_patience: int=25,         # seconds
-    speed_multiplier: int=4,
+    speed_multiplier: int=20,
     simulation_time: int=3600           #seconds
     ) -> None:
 
@@ -102,7 +102,8 @@ def start_simulation(
             pygame.draw.rect(screen, (30, 30, 30) if i % 2 == 0 else (50, 50, 50), building.levels[i].background_gfx)
 
             # up / down call buttons
-            for elevator in elevator_controller.elevators[:-1]: 
+            if len(elevator_controller.elevators) == 1:
+                elevator = elevator_controller.elevators[0]
                 pygame.draw.polygon(screen, 
                 (0, 0, 0) if not building.levels[i].up_pressed else (200, 0, 0),
                 [
@@ -124,6 +125,29 @@ def start_simulation(
                     building.levels[i].background_gfx.y+100)
                 ]
                 )
+            else:    
+                for elevator in elevator_controller.elevators[:-1]: 
+                    pygame.draw.polygon(screen, 
+                    (0, 0, 0) if not building.levels[i].up_pressed else (200, 0, 0),
+                    [
+                        (elevator.graphics.x+elevator.graphics.width+(elevator_controller.elevator_margin_x-40)/2, 
+                        building.levels[i].background_gfx.y+100),
+                        (elevator.graphics.x+elevator.graphics.width+20+(elevator_controller.elevator_margin_x-40)/2, 
+                        building.levels[i].background_gfx.y+100),
+                        (elevator.graphics.x+elevator.graphics.width+10+(elevator_controller.elevator_margin_x-40)/2, 
+                        building.levels[i].background_gfx.y+75)
+                    ])
+                    pygame.draw.polygon(screen,
+                    (0, 0, 0) if not building.levels[i].down_pressed else (200, 0, 0),
+                    [    
+                        (elevator.graphics.x+elevator.graphics.width+20+(elevator_controller.elevator_margin_x-40)/2, 
+                        building.levels[i].background_gfx.y+75),
+                        (elevator.graphics.x+elevator.graphics.width+40+(elevator_controller.elevator_margin_x-40)/2, 
+                        building.levels[i].background_gfx.y+75),
+                        (elevator.graphics.x+elevator.graphics.width+30+(elevator_controller.elevator_margin_x-40)/2, 
+                        building.levels[i].background_gfx.y+100)
+                    ]
+                    )
 
         # draw the elevators
         for e in elevator_controller.elevators:
@@ -134,7 +158,7 @@ def start_simulation(
         # draw passenger
         for passenger in passengers:
             color = None
-            if passenger.states["walking"] :
+            if passenger.states["walking"]:
                 if passenger.current_level != passenger.target_level:
                     if not passenger.states["annoyed"]:
                         color = (100, 0, 0)
