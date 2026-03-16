@@ -11,21 +11,21 @@ from building import Building
 
 # === vars ===
 
-width = 1600
-height = 1200
+width = 2500
+height = 1600
 target_framerate = 60    
 
 
 # === simulation method(s) ===
 
 def start_simulation(
-    elevator_count: int=6, 
-    level_count: int=4,
+    elevator_count: int=4, 
+    level_count: int=6,
     big_elevator_spawn_probability: float=0.3,
     elevator_mode: str="algorithm",     # algorithm, random, pingpong      
-    passenger_spawn_chance: float=5,    # probability / second
+    passenger_spawn_chance: float=1,    # probability / second
     passenger_patience: int=25,         # seconds
-    speed_multiplier: int=20,
+    speed_multiplier: int=1,
     simulation_time: int=3600           #seconds
     ) -> None:
 
@@ -131,29 +131,51 @@ def start_simulation(
                     (0, 0, 0) if not building.levels[i].up_pressed else (200, 0, 0),
                     [
                         (elevator.graphics.x+elevator.graphics.width+(elevator_controller.elevator_margin_x-40)/2, 
-                        building.levels[i].background_gfx.y+100),
+                        building.levels[i].background_gfx.y+150),
                         (elevator.graphics.x+elevator.graphics.width+20+(elevator_controller.elevator_margin_x-40)/2, 
-                        building.levels[i].background_gfx.y+100),
+                        building.levels[i].background_gfx.y+150),
                         (elevator.graphics.x+elevator.graphics.width+10+(elevator_controller.elevator_margin_x-40)/2, 
-                        building.levels[i].background_gfx.y+75)
+                        building.levels[i].background_gfx.y+125)
                     ])
                     pygame.draw.polygon(screen,
                     (0, 0, 0) if not building.levels[i].down_pressed else (200, 0, 0),
                     [    
                         (elevator.graphics.x+elevator.graphics.width+20+(elevator_controller.elevator_margin_x-40)/2, 
-                        building.levels[i].background_gfx.y+75),
+                        building.levels[i].background_gfx.y+125),
                         (elevator.graphics.x+elevator.graphics.width+40+(elevator_controller.elevator_margin_x-40)/2, 
-                        building.levels[i].background_gfx.y+75),
+                        building.levels[i].background_gfx.y+125),
                         (elevator.graphics.x+elevator.graphics.width+30+(elevator_controller.elevator_margin_x-40)/2, 
-                        building.levels[i].background_gfx.y+100)
+                        building.levels[i].background_gfx.y+150)
                     ]
                     )
 
         # draw the elevators
         for e in elevator_controller.elevators:
+            # draw each elevator
             pygame.draw.rect(screen, 
             (255, 255, 255) if e.target_level != None else (0, 0, 200), 
             e.graphics)
+
+            # draw door
+            pygame.draw.rect(screen, (0, 0, 0), e.door)
+
+            # draw a status of direction the elevator is travelling to
+            if e.direction == 1:
+                pygame.draw.polygon(screen,
+                (200, 0, 0),
+                [
+                    (e.graphics.x+e.graphics.width//2-10, e.graphics.y-30),
+                    (e.graphics.x+e.graphics.width//2+10, e.graphics.y-30),
+                    (e.graphics.x+e.graphics.width//2, e.graphics.y-15)
+                ])
+            elif e.direction == -1:
+                pygame.draw.polygon(screen,
+                (0, 200, 0),
+                [
+                    (e.graphics.x+e.graphics.width//2-10, e.graphics.y-15),
+                    (e.graphics.x+e.graphics.width//2+10, e.graphics.y-15),
+                    (e.graphics.x+e.graphics.width//2, e.graphics.y-30)
+                ])
 
         # draw passenger
         for passenger in passengers:
@@ -161,7 +183,7 @@ def start_simulation(
             if passenger.states["walking"]:
                 if passenger.current_level != passenger.target_level:
                     if not passenger.states["annoyed"]:
-                        color = (100, 0, 0)
+                        color = (200, 0, 200)
                     else:
                         color = (255, 0, 0)
                 else:
@@ -169,7 +191,7 @@ def start_simulation(
             elif passenger.states["elevator_called"]: 
                 color = (0, 0, 200)
             else:
-                color = (0, 0, 0)
+                color = (0, 0, 200)
             pygame.draw.rect(screen, color, passenger.graphics)
 
         # draw onto window

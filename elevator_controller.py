@@ -72,12 +72,27 @@ class ElevatorController:
                 200)
             offset_x += random_elevator.width + self.elevator_margin_x
 
+            # get initial queue for random and pingpong mode
+            if elevator_mode == "pingpong":
+                random_elevator.add_to_queue(self.building.levels[0])
+            elif elevator_mode == "random":
+                level_count = self.building.level_count
+                random_level = self.building.levels[random.randint(0, level_count-1)]
+                random_elevator.add_to_queue(random_level)
+
             self.elevators.append(random_elevator)
 
         # for keeping things pretty, center all elevators
         start_x = (self.building.width - self.get_total_elevators_width()) // 2
         for elevator in self.elevators:
             elevator.graphics.x += start_x
+            center_x = elevator.graphics.x + elevator.graphics.width // 2
+            elevator.door = pygame.Rect(
+                center_x-elevator.graphics.width//3,
+                elevator.graphics.y,
+                2*elevator.graphics.width//3,
+                elevator.graphics.height
+            )
 
     def try_to_send_elevator_to_call(self) -> None:
         # handle which elevator travels to which floor

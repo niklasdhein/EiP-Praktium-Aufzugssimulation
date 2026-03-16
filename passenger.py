@@ -45,7 +45,6 @@ class Passenger:
     def leave_elevator(self, target_x: int, new_level: Level) -> None:
         self.states["in_elevator"] = False
         self.states["elevator_called"] = False
-        self.current_patience = self.patience
         self.current_level = new_level
         new_level.passengers.append(self)
         self.graphics.y = self.current_level.background_gfx.y + self.current_level.background_gfx.height - 60
@@ -54,14 +53,13 @@ class Passenger:
 
         self.set_target(target_x=target_x)
 
-    def enter_elevator(self) -> None:
+    def enter_elevator(self, target_x: int) -> None:
         self.current_level.remove_passenger_from_level(self)
 
         self.states["elevator_called"] = False
         self.states["in_elevator"] = True
 
-        self.graphics.width = 0
-        self.graphics.height = 0
+        self.set_target(target_x=target_x)
 
     def move_to_target_x(self, dt: float) -> None:
         """
@@ -75,8 +73,9 @@ class Passenger:
         if self.walk_direction == -1 and self.graphics.x <= self.walk_target_x\
         or self.walk_direction == 1 and self.graphics.x >= self.walk_target_x:
             self.remove_target()
-            if self.current_level == self.target_level:
-                del self
+            if self.states["in_elevator"]:
+                self.graphics.width = 0
+                self.graphics.height = 0
 
     def remove_target(self) -> None:
         self.graphics.x = self.walk_target_x

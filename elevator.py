@@ -22,11 +22,12 @@ class Elevator:
         self.target_level = None    # tracks the level travelling to
         self.target_y = None        # target y coordinate
 
-        self.waittime = 7.5         # seconds of doors opened
+        self.waittime = 8           # seconds of doors opened
         self.time_elapsed = 0
         self.handled_exit_from_target = False
 
         self.graphics = None        # stores the pygame object like rect, sprite, ..
+        self.door = None
 
         self.passengers = [] 
 
@@ -37,7 +38,6 @@ class Elevator:
             load += self.passengers[i].weight
 
         return load
-
 
     def remove_calls_from_level(self) -> None:
         self.current_level.up_pressed = False
@@ -59,7 +59,9 @@ class Elevator:
 
     def move(self, dt: float, speed_multiplier: float) -> None:
         # print(f"moving by {self.direction * self.speed * dt}")
-        self.graphics.y += self.direction * self.speed * speed_multiplier * dt
+        delta = self.direction * self.speed * speed_multiplier * dt
+        self.graphics.y += delta
+        self.door.y += delta
 
     def has_arrived_at_target(self) -> bool:
         # returns true if either was moving and reached the target or
@@ -98,9 +100,25 @@ class Elevator:
             # 5. removes old elevator target
             self.remove_target()
 
-            # 6. get new target
-            if len(self.queue) > 0:
-                self.set_target(self.queue[0])
+            # 6. get the next target from queue (only algorithm mode)
+            if self.mode == "algorithm":
+                if len(self.queue) > 0:
+                    self.set_target(self.queue[0])
+            
+            # set a random target when in random mode
+            elif self.mode == "random":
+                level_count = self.elevator_controller.building.level_count
+                random_level = self.elevator_controller.building.levels[random.randint(0, level_count-1)]
+                self.add_to_queue(random_level)
+            
+            elif self.mode == "pingpong":
+                all_levels = self.elevator_controller.building.levels
+                if self.current_level == all_levels[-1]:
+                    self.add_multiple_to_queue(reversed(all_levels[:-1]))
+                elif self.current_level == all_levels[0]:
+                    self.add_multiple_to_queue(all_levels[1:])
+                else:
+                    self.set_target(self.queue[0])
 
         def handle_overweight() -> None:
             while self.get_load() > self.capacity:
@@ -122,47 +140,42 @@ class Elevator:
             # check if arrival has not been handled yet
             elif self.has_arrived_at_target():
                 self.graphics.y = self.target_y
+                self.door.y = self.target_y
                 handle_arrival_at_target()
                 self.time_elapsed = 0
                 self.handled_exit_from_target = False
+
+            # if doors are not closed fully, close them
+            if self.door.width > 0:
+                self.door.width -= dt * speed_multiplier * 200
+                if self.door.width < 0:
+                    self.door.width = 0
         
-        # == else wait for passengers ==
+        # == else wait for passengers and get their targets (only in algorithm mode) ==
         else:
             passengers_of_level = self.current_level.passengers
             for passenger in passengers_of_level:
-
                 # only let these passengers in the level enter who
                 # have called the elevator, are not annoyed and are
                 # not already in the elevator
                 if passenger.states["elevator_called"] and \
                     not passenger.states["in_elevator"] and \
                     not passenger.states["annoyed"]:
-                    passenger.enter_elevator()
-                    if not passenger.target_level in self.queue:
+                    if not passenger.target_level in self.queue and self.mode == "algorithm":
                         self.add_to_queue(passenger.target_level)
+
+                    passenger.enter_elevator(target_x=self.graphics.x+self.graphics.width//2)
                     self.passengers.append(passenger)
+
+            # if doors are not opened, open them
+            if self.door.width < 2*self.graphics.width//3:
+                self.door.width += dt * speed_multiplier * 200
+                if self.door.width > 2*self.graphics.width//3:
+                    self.door.width = 2*self.graphics.width//3
         
         # count up the time elapsed since last arrival
         self.time_elapsed += dt * speed_multiplier
-
-        # pick a target on your own if algorithm mode is disabled
-        # when algorithm mode is enabled targets will get sent by the controller
-        # and set by passengers
-        """elif self.mode != "algorithm":
-            if self.mode == "random":
-                self.add_random_level_to_queue()
-            elif self.mode == "pingpong":
-                building_center_y = self.elevator_controller.building.bottom_y -\
-                    self.elevator_controller.building.level_count *\
-                    self.elevator_controller.building.levels[0].background_gfx.height *\
-                    0.5
-                if self.graphics.y < building_center_y:
-                    self.add_multiple_to_queue(reversed(self.elevator_controller.building.levels))
-                else:
-                    self.add_multiple_to_queue(self.elevator_controller.building.levels)
-            else:
-                print("elevator in unknown mode")"""
-
+        
     def remove_target(self) -> None:
         """
         A target is removed, when the elevator arrives.
@@ -182,11 +195,6 @@ class Elevator:
         if self.graphics.y < self.target_y: self.direction = 1
         elif self.graphics.y > self.target_y: self.direction = -1
         else: self.direction = 0
-
-        """print(f"got new target level: {self.target_level.level}")
-        print("- queue -")
-        for q in self.queue:
-            print(f"\t[ {q.level} ]")"""
 
     def add_to_queue(self, target_level: Level) -> None:
         self.queue.append(target_level)
