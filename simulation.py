@@ -16,17 +16,17 @@ height = 1600
 target_framerate = 1000    
 
 
-# === simulation method(s) ===
+# === simulation method ===
 
 def start_simulation(
     elevator_count: int=3, 
     level_count: int=5,
     big_elevator_spawn_probability: float=0.3,
     elevator_mode: str="algorithm",     # algorithm, random, pingpong      
-    passenger_spawn_chance: float=0.5,    # probability / second
+    passenger_spawn_chance: float=1,    # probability / second
     passenger_patience: int=25,         # seconds
     speed_multiplier: int=10,
-    simulation_time: int=10           #seconds
+    simulation_time: int=3600           #seconds
     ) -> None:
 
 

@@ -52,13 +52,21 @@ class Passenger:
 
         self.set_target(target_x=target_x)
 
-    def enter_elevator(self, target_x: int) -> None:
+    def enter_elevator(self, target_x: int, direction: int) -> bool:
+        # do not enter, when the elevator is moving in a direction you do not want to go to
+        if direction == 1 and self.target_level.level > self.current_level.level\
+            or direction == -1 and self.target_level.level < self.current_level.level:
+            return False
+
+        # only enter either if the elevator has no direction, so it will respect yours
+        # or if it has the same direction as you
         self.current_level.remove_passenger_from_level(self)
 
         self.states["elevator_called"] = False
         self.states["in_elevator"] = True
 
         self.set_target(target_x=target_x)
+        return True
 
     def move_to_target_x(self, dt: float, speed_multiplier: float) -> None:
         """
