@@ -90,56 +90,58 @@ def start_simulation(
     def draw_building() -> None:
         # draw each level 
         for i in range(len(building.levels)):
+            level = building.levels[i]
+            button_width = 20
+
             # level background
             pygame.draw.rect(screen, (30, 30, 30) if i % 2 == 0 else (50, 50, 50), building.levels[i].background_gfx)
 
-            # up / down call buttons
+            # one elevator
             if len(elevator_controller.elevators) == 1:
                 elevator = elevator_controller.elevators[0]
+                x = elevator.graphics.x + elevator.graphics.width + (elevator_controller.elevator_margin_x - button_width) / 2
+                y = level.background_gfx.y + level.background_gfx.height - elevator.graphics.height / 2 
+
+                # up call-button
                 pygame.draw.polygon(screen, 
-                (0, 0, 0) if not building.levels[i].up_pressed else (200, 0, 0),
+                (0, 0, 0) if not building.levels[i].up_pressed else (100, 0, 0),
                 [
-                    (elevator.graphics.x+elevator.graphics.width+(elevator_controller.elevator_margin_x-40)/2, 
-                    building.levels[i].background_gfx.y+100),
-                    (elevator.graphics.x+elevator.graphics.width+20+(elevator_controller.elevator_margin_x-40)/2, 
-                    building.levels[i].background_gfx.y+100),
-                    (elevator.graphics.x+elevator.graphics.width+10+(elevator_controller.elevator_margin_x-40)/2, 
-                    building.levels[i].background_gfx.y+75)
+                    (x, y),
+                    (x + button_width, y), 
+                    (x + button_width / 2, y - button_width)
                 ])
+                # down call-button
                 pygame.draw.polygon(screen,
-                (0, 0, 0) if not building.levels[i].down_pressed else (200, 0, 0),
+                (0, 0, 0) if not building.levels[i].down_pressed else (100, 0, 0),
                 [    
-                    (elevator.graphics.x+elevator.graphics.width+20+(elevator_controller.elevator_margin_x-40)/2, 
-                    building.levels[i].background_gfx.y+75),
-                    (elevator.graphics.x+elevator.graphics.width+40+(elevator_controller.elevator_margin_x-40)/2, 
-                    building.levels[i].background_gfx.y+75),
-                    (elevator.graphics.x+elevator.graphics.width+30+(elevator_controller.elevator_margin_x-40)/2, 
-                    building.levels[i].background_gfx.y+100)
-                ]
-                )
+                    (x + button_width, y - button_width),
+                    (x + button_width * 2, y - button_width),
+                    (x + button_width * 1.5, y)   
+                ])
+            
+            # more than one elevator
             else:    
                 for elevator in elevator_controller.elevators[:-1]: 
+                    x = elevator.graphics.x + elevator.graphics.width + (elevator_controller.elevator_margin_x - button_width) / 2
+                    y = level.background_gfx.y + level.background_gfx.height - elevator.graphics.height / 2
+                    
+                    # up call-button
                     pygame.draw.polygon(screen, 
                     (0, 0, 0) if not building.levels[i].up_pressed else (100, 0, 0),
                     [
-                        (elevator.graphics.x+elevator.graphics.width+(elevator_controller.elevator_margin_x-40)/2, 
-                        building.levels[i].background_gfx.y+150),
-                        (elevator.graphics.x+elevator.graphics.width+20+(elevator_controller.elevator_margin_x-40)/2, 
-                        building.levels[i].background_gfx.y+150),
-                        (elevator.graphics.x+elevator.graphics.width+10+(elevator_controller.elevator_margin_x-40)/2, 
-                        building.levels[i].background_gfx.y+125)
+                        (x, y),
+                        (x + button_width, y), 
+                        (x + button_width / 2, y - button_width)
                     ])
+
+                    # down call-button
                     pygame.draw.polygon(screen,
                     (0, 0, 0) if not building.levels[i].down_pressed else (100, 0, 0),
                     [    
-                        (elevator.graphics.x+elevator.graphics.width+20+(elevator_controller.elevator_margin_x-40)/2, 
-                        building.levels[i].background_gfx.y+125),
-                        (elevator.graphics.x+elevator.graphics.width+40+(elevator_controller.elevator_margin_x-40)/2, 
-                        building.levels[i].background_gfx.y+125),
-                        (elevator.graphics.x+elevator.graphics.width+30+(elevator_controller.elevator_margin_x-40)/2, 
-                        building.levels[i].background_gfx.y+150)
-                    ]
-                    )
+                        (x + button_width, y - button_width),
+                        (x + button_width * 2, y - button_width),
+                        (x + button_width * 1.5, y)   
+                    ])
             
             # draw a direction indicator above every elevator
             for elevator in elevator_controller.elevators:
@@ -197,8 +199,8 @@ def start_simulation(
 
     # == before setup ==
 
+    # load and use config, when said
     if use_config:
-        # load and apply config
         loaded_config = get_config_from_file(file_path="./config.json", print_config=True)
 
         elevator_count = loaded_config["elevator_count"]

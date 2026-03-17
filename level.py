@@ -9,8 +9,13 @@ class Level:
         
         self.passengers = []        # list of passengers in the level
 
-        self.background_gfx = pygame.Rect(0, self.building.bottom_y - (self.level+1) * 250,\
-            self.building.width, 250)
+        height = self.building.bottom_y / self.building.level_count
+        self.background_gfx = pygame.Rect(
+            0, 
+            self.building.bottom_y - (self.level+1) * height,
+            self.building.width, 
+            height
+        )
 
         # statistics variables
         self.passengers_annoyed = 0

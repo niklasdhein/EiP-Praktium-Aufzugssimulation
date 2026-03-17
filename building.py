@@ -8,8 +8,8 @@ class Building:
         self.bottom_y = bottom_y    # y-coordinate of the bottom edge 
 
         self.levels = []                    # Reference to the level graphics
-        self.create_levels(level_count)
-        self.level_count = len(self.levels)
+        self.level_count = level_count
+        self.create_levels(self.level_count)
 
         self.elevator_controller = None     # reference to the elevator controller the building contains
         self.staircase = None               # reference to the staircase the building contains
@@ -21,4 +21,4 @@ class Building:
         array. 
         """
         for i in range(level_count):
-            self.levels.append(Level(self, i))
+            self.levels.append(Level(building=self, level=i))
