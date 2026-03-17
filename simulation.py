@@ -15,7 +15,7 @@ from building import Building
 
 width = 2500
 height = 1600
-target_framerate = 1000
+target_framerate = 60
 use_config = True
 
 
@@ -59,16 +59,31 @@ def start_simulation(
         Spawns to a certain chance a passenger and appends it to the
         passed array. Also returns wether spawning was a success or not.
         """
+        # probabilty a passenger gets spawned
         if random.random() <= passenger_spawn_chance * speed_multiplier * dt:
-            random_start_level = building.levels[random.randint(0, building.level_count-1)]
-            random_target_level = random_start_level
-            while random_target_level == random_start_level:
-                random_target_level = building.levels[random.randint(0, building.level_count-1)]
-            passengers.append(Passenger(current_level=random_start_level,
-            target_level=random_target_level,
-            weight=80,
-            walk_speed=200,
-            patience=passenger_patience))
+            # spawn on level 0 (60% chance)
+            if random.random() <= 0.6:
+                start_level = building.levels[0]
+
+            # spawn on other random level
+            else:
+                start_level = building.levels[random.randint(0, building.level_count-1)]
+            
+            # choose a valid target (not the same as the start level)
+            target_level = start_level
+            while target_level == start_level:
+                target_level = building.levels[random.randint(0, building.level_count-1)]
+
+            passengers.append(
+                Passenger(
+                    current_level=start_level,
+                    target_level=target_level,
+                    weight=80,
+                    walk_speed=200,
+                    patience=passenger_patience
+                )
+            )
+            
             return True
         return False
 
