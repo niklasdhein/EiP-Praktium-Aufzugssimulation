@@ -82,7 +82,7 @@ class Elevator:
                 for passenger in self.passengers:
                     if self.current_level == passenger.target_level:     # kick out passengers at target
                         building_width = self.elevator_controller.building.width
-                        passenger.leave_elevator(-30 if random.random() <= 0.5 else building_width, self.target_level)
+                        passenger.leave_elevator(-60 if random.random() <= 0.5 else building_width, self.target_level)
                         self.passengers_transported += 1
                     else:
                         passengers_that_remain.append(passenger)

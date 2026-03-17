@@ -62,7 +62,7 @@ def start_simulation(
         # probabilty a passenger gets spawned
         if random.random() <= passenger_spawn_chance * speed_multiplier * dt:
             # spawn on base level (60% chance)
-            if random.random() <= 1:
+            if random.random() <= 0.6:
                 start_level = building.base_level
 
             # spawn on other random level
@@ -80,7 +80,8 @@ def start_simulation(
                     target_level=target_level,
                     weight=80,
                     walk_speed=200,
-                    patience=passenger_patience
+                    patience=passenger_patience,
+                    use_sprite=True
                 )
             )
             
@@ -100,6 +101,8 @@ def start_simulation(
                 pygame.draw.rect(screen, (150, 150, 150) if i % 2 == 0 else (170, 170, 170), level.background_gfx)
 
             # one elevator
+            call_color = (200, 50, 50)
+            no_call_color = (0, 0, 0)
             if len(elevator_controller.elevators) == 1:
                 elevator = elevator_controller.elevators[0]
                 x = elevator.graphics.x + elevator.graphics.width + (elevator_controller.elevator_margin_x - button_width) / 2
@@ -107,7 +110,7 @@ def start_simulation(
 
                 # up call-button
                 pygame.draw.polygon(screen, 
-                (0, 0, 0) if not building.levels[i].up_pressed else (100, 0, 0),
+                no_call_color if not building.levels[i].up_pressed else call_color,
                 [
                     (x, y),
                     (x + button_width, y), 
@@ -115,7 +118,7 @@ def start_simulation(
                 ])
                 # down call-button
                 pygame.draw.polygon(screen,
-                (0, 0, 0) if not building.levels[i].down_pressed else (100, 0, 0),
+                no_call_color if not building.levels[i].down_pressed else call_color,
                 [    
                     (x + button_width, y - button_width),
                     (x + button_width * 2, y - button_width),
@@ -130,7 +133,7 @@ def start_simulation(
                     
                     # up call-button
                     pygame.draw.polygon(screen, 
-                    (0, 0, 0) if not building.levels[i].up_pressed else (100, 0, 0),
+                    no_call_color if not building.levels[i].up_pressed else call_color,
                     [
                         (x, y),
                         (x + button_width, y), 
@@ -139,7 +142,7 @@ def start_simulation(
 
                     # down call-button
                     pygame.draw.polygon(screen,
-                    (0, 0, 0) if not building.levels[i].down_pressed else (100, 0, 0),
+                    no_call_color if not building.levels[i].down_pressed else call_color,
                     [    
                         (x + button_width, y - button_width),
                         (x + button_width * 2, y - button_width),
@@ -181,23 +184,42 @@ def start_simulation(
             # draw door
             pygame.draw.rect(screen, (0, 0, 0), e.door)
 
-    def draw_passengers() -> None:
+    def draw_passengers() -> None:  
         # draw passenger
         for passenger in passengers:
-            color = None
-            if passenger.states["walking"]:
-                if passenger.current_level != passenger.target_level:
-                    if not passenger.states["annoyed"]:
-                        color = (200, 0, 200)
-                    else:
-                        color = (255, 0, 0)
+            if not passenger.visible: continue
+
+            # in case sprites are used
+            if passenger.use_sprite:
+                if passenger.walk_direction == -1:
+                    screen.blit(
+                        passenger.left_loaded_surfaces[passenger.shown_surface_index], passenger.graphics
+                    )
+                elif passenger.walk_direction == 1:
+                    screen.blit(
+                        passenger.right_loaded_surfaces[passenger.shown_surface_index], passenger.graphics
+                    )
                 else:
-                    color = (0, 200, 0)
-            elif passenger.states["elevator_called"]: 
-                color = (0, 0, 200)
+                    screen.blit(
+                        passenger.idle_loaded_surfaces[passenger.shown_surface_index], passenger.graphics
+                    )
+
+            # in case rectangles are used
             else:
-                color = (0, 0, 200)
-            pygame.draw.rect(screen, color, passenger.graphics)
+                color = None
+                if passenger.states["walking"]:
+                    if passenger.current_level != passenger.target_level:
+                        if not passenger.states["annoyed"]:
+                            color = (200, 0, 200)
+                        else:
+                            color = (255, 0, 0)
+                    else:
+                        color = (0, 200, 0)
+                elif passenger.states["elevator_called"]: 
+                    color = (0, 0, 200)
+                else:
+                    color = (0, 0, 200)
+                pygame.draw.rect(screen, color, passenger.graphics)
 
 
     # == before setup ==

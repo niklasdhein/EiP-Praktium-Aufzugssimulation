@@ -7,13 +7,22 @@ class Passenger:
     target_level: Level,
     patience: int,  
     weight: int, 
-    walk_speed: int) -> None:
+    walk_speed: int,
+    use_sprite: bool) -> None:
         self.current_level = current_level          # level the passenger is in currently
         self.target_level = target_level            # level the passenger wants to travel to
         self.patience = patience
         self.weight = weight
         self.walk_speed = walk_speed
-        
+
+        self.use_sprite = use_sprite
+        self.shown_surface_index = 0
+        self.frametime = 0
+
+        self.left_loaded_surfaces = []
+        self.right_loaded_surfaces = []
+        self.idle_loaded_surfaces = []
+
         self.current_patience = self.patience
         self.walk_target_x = None
         self.walk_direction = 0
@@ -26,14 +35,68 @@ class Passenger:
             "walking": False
         }
 
+        self.visible = True
+
         self.current_level.passengers.append(self)
 
+        if self.use_sprite:
+            image_directory = "./sprites/"
+            left_image_files = [
+                "walk_left_1.png",
+                "walk_left_2.png",
+                "walk_left_3.png",
+                "walk_left_4.png",
+                "walk_left_5.png",
+                "walk_left_6.png"
+            ]
+            right_image_files = [
+                "walk_right_1.png",
+                "walk_right_2.png",
+                "walk_right_3.png",
+                "walk_right_4.png",
+                "walk_right_5.png",
+                "walk_right_6.png"
+            ]
+            idle_image_files = [
+                "idle_1.png",
+                "idle_2.png",
+                "idle_3.png",
+                "idle_4.png",
+                "idle_5.png",
+                "idle_6.png",
+                "idle_7.png",
+                "idle_8.png",
+                "idle_9.png",
+                "idle_10.png"
+            ]
+
+            for image in left_image_files:
+                left_loaded_surface = pygame.image.load(image_directory + image)
+                left_loaded_surface = left_loaded_surface.convert_alpha()
+                left_loaded_surface = pygame.transform.scale(left_loaded_surface, (60, 60))
+
+                self.left_loaded_surfaces.append(left_loaded_surface)
+
+            for image in right_image_files:
+                right_loaded_surface = pygame.image.load(image_directory + image)
+                right_loaded_surface = right_loaded_surface.convert_alpha()
+                right_loaded_surface = pygame.transform.scale(right_loaded_surface, (60, 60))
+
+                self.right_loaded_surfaces.append(right_loaded_surface)
+
+            for image in idle_image_files:
+                idle_loaded_surface = pygame.image.load(image_directory + image)
+                idle_loaded_surface = idle_loaded_surface.convert_alpha()
+                idle_loaded_surface = pygame.transform.scale(idle_loaded_surface, (60, 60))
+
+                self.idle_loaded_surfaces.append(idle_loaded_surface)
+
         self.graphics = pygame.Rect(
-            -30 if random.random() <= 0.5 else self.current_level.building.width, 
+            -60 if random.random() <= 0.5 else self.current_level.building.width, 
             self.current_level.background_gfx.y + self.current_level.background_gfx.height - 60,
-            30, 
+            60, 
             60
-            ) 
+        ) 
 
         # spawn each passenger with target to walk towards elevators
         screen_center_x = self.current_level.building.width // 2
@@ -47,8 +110,7 @@ class Passenger:
         self.current_level = new_level
         new_level.passengers.append(self)
         self.graphics.y = self.current_level.background_gfx.y + self.current_level.background_gfx.height - 60
-        self.graphics.width = 30
-        self.graphics.height = 60
+        self.visible = True
 
         self.set_target(target_x=target_x)
 
@@ -81,8 +143,8 @@ class Passenger:
         or self.walk_direction == 1 and self.graphics.x >= self.walk_target_x:
             self.remove_target()
             if self.states["in_elevator"]:
-                self.graphics.width = 0
-                self.graphics.height = 0
+                self.visible = False
+
 
     def remove_target(self) -> None:
         self.graphics.x = self.walk_target_x
@@ -97,6 +159,9 @@ class Passenger:
         if self.walk_target_x > self.graphics.x: self.walk_direction = 1
         elif self.walk_target_x < self.graphics.x: self.walk_direction = -1
         else: self.remove_target()
+
+        # reset animation each time the target changes
+        self.shown_surface_index = 0
 
     def update(self, dt: float, speed_multiplier: float) -> None:
         """
@@ -128,3 +193,14 @@ class Passenger:
                 self.states["annoyed"] = True
                 self.set_target(self.current_level.building.width)
                 self.current_level.passengers_annoyed += 1
+
+        # change to next frame
+        if self.frametime >= 0.2:
+            if self.walk_direction != 0:
+                self.shown_surface_index = (self.shown_surface_index + 1) % 6
+            else:
+                self.shown_surface_index = (self.shown_surface_index + 1) % 10
+            self.frametime = 0
+
+        # update the time the current frame is shown
+        self.frametime += dt * speed_multiplier
