@@ -1,6 +1,8 @@
 import pygame
 import random
 import math
+import json
+import os
 
 # custom scripts
 from elevator import Elevator
@@ -13,10 +15,30 @@ from building import Building
 
 width = 2500
 height = 1600
-target_framerate = 1000    
+target_framerate = 1000
+use_config = True
 
 
-# === simulation method ===
+# === simulation method(s) ===
+
+def get_config_from_file(file_path: str="./config.json", print_config: bool=False) -> dict:
+    # return if file doesn't exists
+    if not os.path.exists(file_path):
+        return
+
+    # load the config
+    loaded_config = {}
+    with open(file_path) as f:
+        loaded_config = json.load(f)
+
+    # show config
+    if print_config:
+        print("== loaded config ==")
+        for key in loaded_config:
+            print(f"{key}:\t{loaded_config[key]}")
+        print("==  config end   ==")
+
+    return loaded_config
 
 def start_simulation(
     elevator_count: int=3, 
@@ -157,6 +179,23 @@ def start_simulation(
                 color = (0, 0, 200)
             pygame.draw.rect(screen, color, passenger.graphics)
 
+
+    # == before setup ==
+
+    if use_config:
+        # load and apply config
+        loaded_config = get_config_from_file(file_path="./config.json", print_config=True)
+
+        elevator_count = loaded_config["elevator_count"]
+        level_count = loaded_config["level_count"]
+        big_elevator_spawn_probability = loaded_config["big_elevator_spawn_probability"]
+        elevator_mode = loaded_config["elevator_mode"]
+        passenger_spawn_chance = loaded_config["passenger_spawn_chance"]
+        passenger_patience = loaded_config["passenger_patience"]
+        speed_multiplier = loaded_config["speed_multiplier"]
+        simulation_time = loaded_config["simulation_time"]
+
+
     # == pre sim stuff ==
 
     # initialize pygame
@@ -199,8 +238,7 @@ def start_simulation(
 
         # exit when closing the window
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
+            if event.type == pygame.QUIT: running = False
 
         # exit when runtime is over
         time_elapsed += dt
@@ -228,6 +266,7 @@ def start_simulation(
 
         # draw on window
         pygame.display.flip()
+
     pygame.quit()
 
     print(f"simulation exited. {time_elapsed:.3f}s elapsed.")
