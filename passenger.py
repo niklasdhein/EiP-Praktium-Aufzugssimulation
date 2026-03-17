@@ -30,7 +30,7 @@ class Passenger:
 
         self.graphics = pygame.Rect(
             -30 if random.random() <= 0.5 else self.current_level.building.width, 
-            self.current_level.building.bottom_y - self.current_level.level * self.current_level.background_gfx.height - 60,
+            self.current_level.background_gfx.y + self.current_level.background_gfx.height - 60,
             30, 
             60
             ) 

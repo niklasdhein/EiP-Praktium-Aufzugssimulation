@@ -47,7 +47,7 @@ def start_simulation(
     elevator_mode: str="algorithm",     # algorithm, random, pingpong      
     passenger_spawn_chance: float=1,    # probability / second
     passenger_patience: int=25,         # seconds
-    speed_multiplier: int=10,
+    speed_multiplier: int=3,
     simulation_time: int=3600           #seconds
     ) -> None:
 
@@ -61,9 +61,9 @@ def start_simulation(
         """
         # probabilty a passenger gets spawned
         if random.random() <= passenger_spawn_chance * speed_multiplier * dt:
-            # spawn on level 0 (60% chance)
-            if random.random() <= 0.6:
-                start_level = building.levels[0]
+            # spawn on base level (60% chance)
+            if random.random() <= 1:
+                start_level = building.base_level
 
             # spawn on other random level
             else:
@@ -94,7 +94,10 @@ def start_simulation(
             button_width = 20
 
             # level background
-            pygame.draw.rect(screen, (30, 30, 30) if i % 2 == 0 else (50, 50, 50), building.levels[i].background_gfx)
+            if level.type == "basement":
+                pygame.draw.rect(screen, (30, 30, 30) if i % 2 == 0 else (50, 50, 50), level.background_gfx)
+            elif level.type == "normal":
+                pygame.draw.rect(screen, (150, 150, 150) if i % 2 == 0 else (170, 170, 170), level.background_gfx)
 
             # one elevator
             if len(elevator_controller.elevators) == 1:

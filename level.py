@@ -4,6 +4,8 @@ class Level:
     def __init__(self, building: Building, level: int) -> None:
         self.building = building    # building the level belongs to
         self.level = level          # level of the level
+        self.type = None
+
         self.up_pressed = False     # tracks if someone pressed up 
         self.down_pressed = False   # or down button for elevator
         

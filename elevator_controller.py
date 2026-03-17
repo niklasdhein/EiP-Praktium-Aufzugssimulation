@@ -65,8 +65,8 @@ class ElevatorController:
             # instantiate the pygame part
             random_elevator.graphics = pygame.Rect(
                 offset_x, 
-                self.building.bottom_y - random_elevator.current_level.background_gfx.height\
-                * random_elevator.current_level.level - 200, 
+                random_elevator.current_level.background_gfx.y + \
+                    random_elevator.current_level.background_gfx.height - 200, 
                 random_elevator.width, 
                 200)
             offset_x += random_elevator.width + self.elevator_margin_x
