@@ -295,7 +295,7 @@ def start_simulation(
     while running:
         # calculates delta time
         dt = clock.tick(target_framerate) / 1000.0
-        print(f"FPS: {1/dt}")
+        # print(f"FPS: {1/dt}")
 
         # exit when closing the window
         for event in pygame.event.get():

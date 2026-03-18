@@ -85,11 +85,10 @@ class ElevatorController:
         start_x = (self.building.width - self.get_total_elevators_width()) // 2
         for elevator in self.elevators:
             elevator.graphics.x += start_x
-            center_x = elevator.graphics.x + elevator.graphics.width // 2
             elevator.door = pygame.Rect(
-                center_x-elevator.graphics.width//3,
+                elevator.graphics.x,
                 elevator.graphics.y,
-                2*elevator.graphics.width//3,
+                elevator.graphics.height,
                 elevator.graphics.height
             )
 

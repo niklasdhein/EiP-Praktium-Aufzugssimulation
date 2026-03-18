@@ -177,10 +177,10 @@ class Elevator:
                     
 
             # if doors are not opened, open them
-            if self.door.width < 2*self.graphics.width//3:
+            if self.door.width < self.graphics.width:
                 self.door.width += dt * speed_multiplier * 200
-                if self.door.width > 2*self.graphics.width//3:
-                    self.door.width = 2*self.graphics.width//3
+                if self.door.width > self.graphics.width:
+                    self.door.width = self.graphics.width
         
         # count up the time elapsed since last arrival
         self.time_elapsed += dt * speed_multiplier
