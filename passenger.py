@@ -21,6 +21,9 @@ class Passenger:
 
         self.left_loaded_surfaces = []
         self.right_loaded_surfaces = []
+        self.good_left_loaded_surfaces = []
+        self.good_right_loaded_surfaces = []
+        self.bad_right_loaded_surfaces = []
         self.idle_loaded_surfaces = []
 
         self.current_patience = self.patience
@@ -39,6 +42,7 @@ class Passenger:
 
         self.current_level.passengers.append(self)
 
+        # load sprites from disk
         if self.use_sprite:
             image_directory = "./sprites/"
             left_image_files = [
@@ -56,6 +60,30 @@ class Passenger:
                 "walk_right_4.png",
                 "walk_right_5.png",
                 "walk_right_6.png"
+            ]
+            good_left_image_files = [
+                "good_walk_left_1.png",
+                "good_walk_left_2.png",
+                "good_walk_left_3.png",
+                "good_walk_left_4.png",
+                "good_walk_left_5.png",
+                "good_walk_left_6.png"
+            ]
+            good_right_files = [
+                "good_walk_right_1.png",
+                "good_walk_right_2.png",
+                "good_walk_right_3.png",
+                "good_walk_right_4.png",
+                "good_walk_right_5.png",
+                "good_walk_right_6.png"
+            ]
+            bad_right_files = [
+                "bad_walk_right_1.png",
+                "bad_walk_right_2.png",
+                "bad_walk_right_3.png",
+                "bad_walk_right_4.png",
+                "bad_walk_right_5.png",
+                "bad_walk_right_6.png",
             ]
             idle_image_files = [
                 "idle_1.png",
@@ -83,6 +111,27 @@ class Passenger:
                 right_loaded_surface = pygame.transform.scale(right_loaded_surface, (60, 60))
 
                 self.right_loaded_surfaces.append(right_loaded_surface)
+
+            for image in good_left_image_files:
+                good_left_loaded_surface = pygame.image.load(image_directory + image)
+                good_left_loaded_surface = good_left_loaded_surface.convert_alpha()
+                good_left_loaded_surface = pygame.transform.scale(good_left_loaded_surface, (60, 60))
+
+                self.good_left_loaded_surfaces.append(good_left_loaded_surface)
+
+            for image in good_right_files:
+                good_right_loaded_surface = pygame.image.load(image_directory + image)
+                good_right_loaded_surface = good_right_loaded_surface.convert_alpha()
+                good_right_loaded_surface = pygame.transform.scale(good_right_loaded_surface, (60, 60))
+
+                self.good_right_loaded_surfaces.append(good_right_loaded_surface)
+
+            for image in bad_right_files:
+                bad_right_loaded_surface = pygame.image.load(image_directory + image)
+                bad_right_loaded_surface = bad_right_loaded_surface.convert_alpha()
+                bad_right_loaded_surface = pygame.transform.scale(bad_right_loaded_surface, (60, 60))
+
+                self.bad_right_loaded_surfaces.append(bad_right_loaded_surface)
 
             for image in idle_image_files:
                 idle_loaded_surface = pygame.image.load(image_directory + image)
@@ -144,7 +193,6 @@ class Passenger:
             self.remove_target()
             if self.states["in_elevator"]:
                 self.visible = False
-
 
     def remove_target(self) -> None:
         self.graphics.x = self.walk_target_x

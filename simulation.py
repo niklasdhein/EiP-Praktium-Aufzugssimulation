@@ -52,7 +52,7 @@ def start_simulation(
     ) -> None:
 
 
-    # == methods used in the simulation ==
+    # == methods used in the simulation ==  
 
     def spawn_passenger(passengers: list) -> bool:
         """
@@ -191,14 +191,33 @@ def start_simulation(
 
             # in case sprites are used
             if passenger.use_sprite:
-                if passenger.walk_direction == -1:
-                    screen.blit(
-                        passenger.left_loaded_surfaces[passenger.shown_surface_index], passenger.graphics
-                    )
-                elif passenger.walk_direction == 1:
-                    screen.blit(
-                        passenger.right_loaded_surfaces[passenger.shown_surface_index], passenger.graphics
-                    )
+                if passenger.walk_direction != 0:
+                    if passenger.current_level != passenger.target_level:
+                        if passenger.walk_direction == -1 and not passenger.states["annoyed"]:
+                            screen.blit(
+                                passenger.left_loaded_surfaces[passenger.shown_surface_index], passenger.graphics
+                            )
+                        elif passenger.walk_direction == -1 and passenger.states["annoyed"]:
+                            pass    # no animation yet
+
+                        elif passenger.walk_direction == 1 and not passenger.states["annoyed"]:
+                            screen.blit(
+                                passenger.right_loaded_surfaces[passenger.shown_surface_index], passenger.graphics
+                            )
+                        elif passenger.walk_direction == 1 and passenger.states["annoyed"]:
+                            screen.blit(
+                                passenger.bad_right_loaded_surfaces[passenger.shown_surface_index], passenger.graphics
+                            )
+
+                    else:
+                        if passenger.walk_direction == -1:
+                            screen.blit(
+                                passenger.good_left_loaded_surfaces[passenger.shown_surface_index], passenger.graphics
+                            )
+                        elif passenger.walk_direction == 1:
+                            screen.blit(
+                                passenger.good_right_loaded_surfaces[passenger.shown_surface_index], passenger.graphics
+                            )
                 else:
                     screen.blit(
                         passenger.idle_loaded_surfaces[passenger.shown_surface_index], passenger.graphics
@@ -276,7 +295,7 @@ def start_simulation(
     while running:
         # calculates delta time
         dt = clock.tick(target_framerate) / 1000.0
-        # print(f"FPS: {1/dt}")
+        print(f"FPS: {1/dt}")
 
         # exit when closing the window
         for event in pygame.event.get():
