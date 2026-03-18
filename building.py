@@ -42,5 +42,3 @@ class Building:
         if self.base_level == None: 
             self.base_level = self.levels[-1]
             self.base_level.type = "normal"
-
-        print(f"basement at {self.base_level.level}")

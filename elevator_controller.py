@@ -88,7 +88,7 @@ class ElevatorController:
             elevator.door = pygame.Rect(
                 elevator.graphics.x,
                 elevator.graphics.y,
-                elevator.graphics.height,
+                elevator.graphics.width,
                 elevator.graphics.height
             )
 
