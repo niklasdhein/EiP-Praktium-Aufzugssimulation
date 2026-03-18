@@ -164,6 +164,7 @@ class ElevatorController:
             for elevator in self.elevators:
                 if len(elevator.queue) == 0 and \
                 call_up_level in elevator.allowed_levels and \
+                call_up_level != elevator.allowed_levels[-1] and \
                 elevator.time_elapsed >= elevator.waittime:
                     elevator.add_to_queue(call_up_level)
                     elevator.target_call = "up"
@@ -174,6 +175,7 @@ class ElevatorController:
             for elevator in self.elevators:
                 if len(elevator.queue) == 0 and \
                 call_down_level in elevator.allowed_levels and \
+                call_down_level != elevator.allowed_levels[0] and \
                 elevator.time_elapsed >= elevator.waittime:
                     elevator.add_to_queue(call_down_level)
                     elevator.target_call = "down"

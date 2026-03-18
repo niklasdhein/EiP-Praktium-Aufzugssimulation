@@ -5,6 +5,6 @@
     "elevator_mode": "algorithm",
     "passenger_spawn_chance": 0.1,
     "passenger_patience": 25,
-    "speed_multiplier": 15,
+    "speed_multiplier": 10,
     "simulation_time": 3600 
 }

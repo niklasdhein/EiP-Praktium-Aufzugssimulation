@@ -12,10 +12,18 @@ class Building:
         self.regular_levels = []            
         self.level_count = level_count
         self.ground_level = None
+        self.bunker_elevator_level = None
         self.create_levels()
 
         self.elevator_controller = None     # reference to the elevator controller the building contains
         self.staircase = None               # reference to the staircase the building contains
+
+    def get_bunker_levels(self):
+        bunker_levels = []
+        for level in self.levels:
+            if level.level_type != "bunker":
+                return bunker_levels
+            bunker_levels.append(level)
 
     def create_levels(self) -> None:
         # spawn bunker only if 3 levels are able to exist (bunker, basement, ground)
@@ -32,6 +40,13 @@ class Building:
         for i in range(self.levels[-1].level + 1 if len(self.levels) > 0 else 0, ground_level_level):
             basement_level = Level(building=self, level=i, level_type="basement")
             self.levels.append(basement_level)
+
+        # if a bunker exists find the basement level which contains the bunker elevator
+        if self.levels[0].level_type == "bunker":
+            for level in self.levels:
+                if level.level_type == "basement":
+                    self.bunker_elevator_level = level
+                    break
         
         # append ground level after basement levels
         self.levels.append(ground_level)

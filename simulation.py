@@ -10,13 +10,14 @@ import os
 from elevator import Elevator
 from elevator_controller import ElevatorController
 from passenger import Passenger
+from codsworth import Codsworth
 from building import Building
 
 
 # === vars ===
 
-width = 2000
-height = 1700
+width = 1500
+height = 1300
 target_framerate = 60
 use_config = True
 
@@ -63,30 +64,49 @@ def start_simulation(
         """
         # probabilty a passenger gets spawned
         if random.random() <= passenger_spawn_chance * speed_multiplier * dt:
+            prob = random.random()
             # spawn on base level (60% chance)
             if random.random() <= 0.6:
                 start_level = building.ground_level
-
             # spawn on other random level
             else:
                 start_level = building.regular_levels[random.randint(0, len(building.regular_levels) - 1)]
-            
             # choose a valid target (not the same as the start level)
             target_level = start_level
             while target_level == start_level:
                 target_level = building.regular_levels[random.randint(0, len(building.regular_levels) - 1)]
 
-            passengers.append(
-                Passenger(
-                    current_level=start_level,
-                    target_level=target_level,
-                    weight=80,
-                    walk_speed=200,
-                    patience=passenger_patience,
-                    use_sprite=True
+            # probability a normal passenger gets spawned
+            if prob <= 0.8:
+                passengers.append(
+                    Passenger(
+                        current_level=start_level,
+                        target_level=target_level,
+                        weight=80,
+                        walk_speed=200,
+                        patience=passenger_patience,
+                        use_sprite=True
+                    )
                 )
-            )
+
+            # probability codsworth gets spawned 
+            elif prob > 0.8 and building.bunker_elevator_level != None:
+                start_level = building.ground_level
+                bunker_levels = building.get_bunker_levels()
+                target_level = bunker_levels[random.randint(0, len(bunker_levels) - 1)]
+                passengers.append(
+                    Codsworth(
+                        current_level=start_level,
+                        target_level=target_level,
+                        bunker_elevator_level=building.bunker_elevator_level,
+                        weight=80,
+                        walk_speed=200,
+                        patience=passenger_patience,
+                        use_sprite=True
+                    )
+                )
             
+            else: return False
             return True
         return False
 
