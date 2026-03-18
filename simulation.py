@@ -65,7 +65,7 @@ def start_simulation(
         if random.random() <= passenger_spawn_chance * speed_multiplier * dt:
             # spawn on base level (60% chance)
             if random.random() <= 0.6:
-                start_level = building.base_level
+                start_level = building.ground_level
 
             # spawn on other random level
             else:
@@ -92,15 +92,21 @@ def start_simulation(
 
     def draw_building() -> None:
         # draw each level 
-        for i in range(len(building.levels)):
+        for i in range(building.level_count):
             level = building.levels[i]
             button_width = 20
 
             # level background
-            if level.type == "basement":
+            if level.level_type == "bunker":
+                pygame.draw.rect(screen, (0, 0, 0) if i % 2 == 0 else (20, 20, 20), level.background_gfx)
+            elif level.level_type == "basement":
                 pygame.draw.rect(screen, (30, 30, 30) if i % 2 == 0 else (50, 50, 50), level.background_gfx)
-            elif level.type == "normal":
+            elif level.level_type == "ground":
+                pygame.draw.rect(screen, (100, 100, 100), level.background_gfx) 
+            elif level.level_type == "upstairs":
                 pygame.draw.rect(screen, (150, 150, 150) if i % 2 == 0 else (170, 170, 170), level.background_gfx)
+            elif level.level_type == "penthouse":
+                pygame.draw.rect(screen, (255, 255, 255) if i % 2 == 0 else (235, 235, 235), level.background_gfx)
 
             # one elevator
             call_color = (200, 50, 50)

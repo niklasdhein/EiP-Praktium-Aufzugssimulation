@@ -1,6 +1,6 @@
 {
     "elevator_count": 3,
-    "level_count": 6,
+    "level_count": 20,
     "big_elevator_spawn_probability": 0.3,
     "elevator_mode": "algorithm",
     "passenger_spawn_chance": 0.1,
