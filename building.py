@@ -8,7 +8,8 @@ class Building:
         self.width = width          # width of building
         self.bottom_y = bottom_y    # y-coordinate of the bottom edge 
 
-        self.levels = []                    # Reference to the level graphics
+        self.levels = []                    # reference to the level graphics
+        self.regular_levels = []            
         self.level_count = level_count
         self.ground_level = None
         self.create_levels()
@@ -18,7 +19,7 @@ class Building:
 
     def create_levels(self) -> None:
         # spawn bunker only if 3 levels are able to exist (bunker, basement, ground)
-        while random.random() <= 0.3 and self.level_count - len(self.levels) >= 3:
+        while random.random() <= 0.4 and self.level_count - len(self.levels) >= 3:
             bunker_level = Level(building=self, level=len(self.levels), level_type="bunker")
             self.levels.append(bunker_level)
         
@@ -53,6 +54,11 @@ class Building:
         # append the penthouse levels after the normal upstairs levels
         self.levels += penthouse_levels
 
-        print("--- building ---")
+        # extract all regular levels for better handling for normal people and elevators
+        for level in self.levels:
+            if level.level_type in ["basement", "ground", "upstairs"]:
+                self.regular_levels.append(level)
+
+        print("--- building (all levels) ---")
         for i in range(len(self.levels) - 1, -1, -1):
             print(f"[ {i} ] {self.levels[i].level_type}")

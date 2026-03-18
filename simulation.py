@@ -69,12 +69,12 @@ def start_simulation(
 
             # spawn on other random level
             else:
-                start_level = building.levels[random.randint(0, building.level_count-1)]
+                start_level = building.regular_levels[random.randint(0, len(building.regular_levels) - 1)]
             
             # choose a valid target (not the same as the start level)
             target_level = start_level
             while target_level == start_level:
-                target_level = building.levels[random.randint(0, building.level_count-1)]
+                target_level = building.regular_levels[random.randint(0, len(building.regular_levels) - 1)]
 
             passengers.append(
                 Passenger(

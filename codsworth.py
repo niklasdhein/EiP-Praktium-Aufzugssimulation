@@ -1,0 +1,2 @@
+class Codsworth(passenger):
+    pass

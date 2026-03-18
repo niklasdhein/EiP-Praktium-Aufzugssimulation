@@ -8,12 +8,14 @@ class Elevator:
     capacity: int, 
     speed: float,
     mode: str,
-    current_level: Level) -> None:
+    current_level: Level,
+    allowed_levels: [Level]) -> None:
         self.elevator_controller = elevator_controller  # parent controller
         self.capacity = capacity    # capacity in kg 
         self.speed = speed if self.capacity <= 1000 else speed * 0.75
         self.mode = mode
         self.current_level = current_level
+        self.allowed_levels = allowed_levels
 
         self.width = 100 if self.capacity <= 1000 else 200
 
@@ -181,11 +183,13 @@ class Elevator:
             passengers_of_level = self.current_level.passengers
             for passenger in passengers_of_level:
                 # only let these passengers in the level enter who
-                # have called the elevator, are not annoyed and are
-                # not already in the elevator
+                # have called the elevator, are not annoyed, are
+                # not already in the elevator and want to travel to a level
+                # the elevator is actually allowed to travel to
                 if passenger.states["elevator_called"] and \
                     not passenger.states["in_elevator"] and \
                     not passenger.states["annoyed"] and \
+                    passenger.target_level in self.allowed_levels and \
                     passenger.enter_elevator(target_x=self.graphics.x+self.graphics.width//2, direction=self.direction):
                         if not passenger.target_level in self.queue and self.mode == "algorithm":
                             self.add_to_queue(passenger.target_level)
