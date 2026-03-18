@@ -15,8 +15,8 @@ from building import Building
 
 # === vars ===
 
-width = 2880
-height = 1720
+width = 2000
+height = 1700
 target_framerate = 60
 use_config = True
 

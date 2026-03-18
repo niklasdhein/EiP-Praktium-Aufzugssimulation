@@ -1,10 +1,10 @@
 {
     "elevator_count": 3,
-    "level_count": 7,
+    "level_count": 6,
     "big_elevator_spawn_probability": 0.3,
     "elevator_mode": "algorithm",
     "passenger_spawn_chance": 0.1,
     "passenger_patience": 25,
-    "speed_multiplier": 300,
-    "simulation_time": 10 
+    "speed_multiplier": 10,
+    "simulation_time": 3600 
 }
