@@ -66,7 +66,8 @@ class ElevatorController:
                 capacity=1000,
                 mode=elevator_mode,
                 current_level=self.building.ground_level,
-                allowed_levels=all_levels_without_bunker
+                allowed_levels=all_levels_without_bunker,
+                use_sprite=True
             )
 
             # create a rect for graphics
@@ -98,7 +99,8 @@ class ElevatorController:
                 capacity=2000,
                 mode=elevator_mode,
                 current_level=bunker_levels_with_last_basement[-1],
-                allowed_levels=bunker_levels_with_last_basement
+                allowed_levels=bunker_levels_with_last_basement,
+                use_sprite=True
             )
 
             # create a rect for graphics
@@ -124,16 +126,17 @@ class ElevatorController:
             capacity=capacity,
             mode=elevator_mode,
             current_level=self.building.levels[random.randint(0, self.building.level_count-1)],
-            allowed_levels=self.building.regular_levels
+            allowed_levels=self.building.regular_levels,
+            use_sprite=True
             )
             
             # instantiate the pygame part
             random_elevator.graphics = pygame.Rect(
                 offset_x, 
                 random_elevator.current_level.background_gfx.y + \
-                    random_elevator.current_level.background_gfx.height - 200, 
+                    random_elevator.current_level.background_gfx.height - 240, 
                 random_elevator.width, 
-                200)
+                240)
             offset_x += random_elevator.width + self.elevator_margin_x
 
             # get initial queue for random and pingpong mode

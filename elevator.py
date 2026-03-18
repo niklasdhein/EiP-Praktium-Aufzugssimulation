@@ -1,6 +1,7 @@
 from building import Building
 
 import random
+import pygame
 
 class Elevator:
     def __init__(self, 
@@ -9,15 +10,17 @@ class Elevator:
     speed: float,
     mode: str,
     current_level: Level,
-    allowed_levels: [Level]) -> None:
+    allowed_levels: [Level],
+    use_sprite: bool) -> None:
         self.elevator_controller = elevator_controller  # parent controller
         self.capacity = capacity    # capacity in kg 
         self.speed = speed if self.capacity <= 1000 else speed * 0.75
         self.mode = mode
         self.current_level = current_level
         self.allowed_levels = allowed_levels
+        self.use_sprite = use_sprite
 
-        self.width = 100 if self.capacity <= 1000 else 200
+        self.width = 120 if self.capacity <= 1000 else 240
 
         self.direction = 0          # tracks the direction the elevator is moving 
         self.queue = []             # tracks the target levels
@@ -36,6 +39,56 @@ class Elevator:
 
         # statistic variables
         self.passengers_transported = 0
+
+        # variables to store loaded surfaces
+        self.elevator_door_closed = []
+        self.elevator_door_opened = []
+        self.elevator_door_close = []
+        self.elevator_door_open = []
+
+        # load and apply sprites
+        image_directory = "./sprites/"
+        elevator_door_closed = "elevator_door_closed.png"
+        elevator_door_opened = "elevator_door_opened.png"
+        elevator_door_close = [
+            "elevator_door_close_1.png",
+            "elevator_door_close_2.png",
+            "elevator_door_close_3.png",
+            "elevator_door_close_4.png",
+            "elevator_door_close_5.png",
+            "elevator_door_close_6.png"
+        ]
+        elevator_door_open = [
+            "elevator_door_open_1.png",
+            "elevator_door_open_2.png",
+            "elevator_door_open_3.png",
+            "elevator_door_open_4.png",
+            "elevator_door_open_5.png"
+        ]
+
+        self.elevator_door_closed = pygame.image.load(image_directory + elevator_door_closed)
+        self.elevator_door_closed = self.elevator_door_closed.convert_alpha()
+        self.elevator_door_closed = pygame.transform.scale(self.elevator_door_closed, (120, 120))
+
+        self.elevator_door_opened = pygame.image.load(image_directory + elevator_door_opened)
+        self.elevator_door_opened = self.elevator_door_opened.convert_alpha()
+        self.elevator_door_opened = pygame.transform.scale(self.elevator_door_opened, (120, 120))
+
+        for e in elevator_door_close:
+            loaded = pygame.image.load(image_directory + e)
+            loaded = loaded.convert_alpha()
+            loaded = pygame.transform.scale(loaded, (120, 240))
+            self.elevator_door_close.append(loaded)
+
+        for e in elevator_door_open:
+            loaded = pygame.image.load(image_directory + e)
+            loaded = loaded.convert_alpha()
+            loaded = pygame.transform.scale(loaded, (120, 240))
+            self.elevator_door_open.append(loaded)
+        
+        self.shown_surface = self.elevator_door_close[-1]
+        self.animation_frame_counter = 0
+        self.frametime = 0
 
     def get_load(self) -> int:
         load = 0
@@ -173,10 +226,21 @@ class Elevator:
                 self.handled_exit_from_target = False
 
             # if doors are not closed fully, close them
-            if self.door.width > 0:
-                self.door.width -= dt * speed_multiplier * 200
-                if self.door.width < 0:
-                    self.door.width = 0
+            if self.use_sprite:
+                if self.shown_surface != self.elevator_door_close[-1]:
+                    if self.frametime >= 0.2 and self.animation_frame_counter < len(self.elevator_door_close) - 1:
+                        self.frametime = 0
+                        self.animation_frame_counter += 1
+                        self.shown_surface = self.elevator_door_close[self.animation_frame_counter]
+                    self.frametime += dt * speed_multiplier
+                else:
+                    self.animation_frame_counter = 0
+
+            else:
+                if self.door.width > 0:
+                    self.door.width -= dt * speed_multiplier * 200
+                    if self.door.width < 0:
+                        self.door.width = 0
         
         # == else wait for passengers and get their targets (only in algorithm mode) ==
         else:
@@ -197,11 +261,22 @@ class Elevator:
                     
 
             # if doors are not opened, open them
-            if self.door.width < self.graphics.width:
-                self.door.width += dt * speed_multiplier * 200
-                if self.door.width > self.graphics.width:
-                    self.door.width = self.graphics.width
-        
+            if self.use_sprite:
+                if self.shown_surface != self.elevator_door_open[-1]:
+                    if self.frametime >= 0.2 and self.animation_frame_counter < len(self.elevator_door_open) - 1:
+                        self.frametime = 0
+                        self.animation_frame_counter += 1
+                        self.shown_surface = self.elevator_door_open[self.animation_frame_counter]
+                    self.frametime += dt * speed_multiplier
+                else:
+                    self.animation_frame_counter = 0
+
+            else:
+                if self.door.width < self.graphics.width:
+                    self.door.width += dt * speed_multiplier * 200
+                    if self.door.width > self.graphics.width:
+                        self.door.width = self.graphics.width
+
         # count up the time elapsed since last arrival
         self.time_elapsed += dt * speed_multiplier
         

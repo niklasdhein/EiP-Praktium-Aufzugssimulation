@@ -204,13 +204,18 @@ def start_simulation(
     def draw_elevators() -> None:
         # draw the elevators
         for e in elevator_controller.elevators:
-            # draw each elevator
-            pygame.draw.rect(screen, 
-            (255, 255, 255) if e.target_level != None else (0, 0, 200), 
-            e.graphics)
+            if not e.use_sprite:
+                # draw each elevator
+                pygame.draw.rect(screen, 
+                (255, 255, 255) if e.target_level != None else (0, 0, 200), 
+                e.graphics)
 
-            # draw door
-            pygame.draw.rect(screen, (0, 0, 0), e.door)
+                # draw door
+                pygame.draw.rect(screen, (0, 0, 0), e.door)
+            else:
+                screen.blit(
+                    e.shown_surface, e.graphics
+                )
 
     def draw_passengers() -> None:  
         # draw passenger
