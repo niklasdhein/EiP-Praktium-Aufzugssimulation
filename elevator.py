@@ -11,7 +11,7 @@ class Elevator:
     current_level: Level) -> None:
         self.elevator_controller = elevator_controller  # parent controller
         self.capacity = capacity    # capacity in kg 
-        self.speed = speed if self.capacity <= 1000 else speed // 2
+        self.speed = speed if self.capacity <= 1000 else speed * 0.75
         self.mode = mode
         self.current_level = current_level
 
@@ -134,6 +134,37 @@ class Elevator:
                 self.passengers[-1].leave_elevator(self.passengers[-1].graphics.x, self.current_level)
                 self.passengers.pop()
 
+        def add_calls_on_the_way() -> None:
+            print(f"elevator is travelling to level {self.target_level.level if self.target_level != None else "none"}.")
+            print("checking for calls on the way ..")
+
+            old_queue = self.queue
+
+            # check down calls
+            if self.direction == 1:
+                passing_levels = self.elevator_controller.building.levels[self.current_level.level-1:self.target_level.level:-1]
+                for level in passing_levels:
+                    if level in self.elevator_controller.elevator_calls["down"]:
+                        self.add_as_first_to_queue(target_level=level)
+                        print(f"(down) found call in level {level.level}")
+
+            # check up calls
+            elif self.direction == -1:
+                passing_levels = self.elevator_controller.building.levels[self.current_level.level+1:self.target_level.level]
+                for level in passing_levels:
+                    if level in self.elevator_controller.elevator_calls["up"]:
+                        self.add_as_first_to_queue(target_level=level)
+                        print(f"(up) found call in level {level.level}")
+            
+            print("respected possible calls.")
+            print("old queue:")
+            for q in old_queue:
+                print(f"[ {q.level} ]")
+            print("\nnew queue:")
+            for q in self.queue:
+                print(f"[ {q.level} ]")
+            print()
+
         # == move if allowed to ==
         if self.time_elapsed >= self.waittime:
 
@@ -144,6 +175,7 @@ class Elevator:
                 self.remove_call_from_level()           # before leaving
                 self.smart_remove_controller_call()     # remove all calls
                 handle_overweight()                     # also handle overweight
+                add_calls_on_the_way()
                 self.handled_exit_from_target = True
 
             # check if arrival has not been handled yet
@@ -209,6 +241,17 @@ class Elevator:
         self.queue.append(target_level)
         if self.target_level == None:
             self.set_target(self.queue[0])
+
+    def add_as_first_to_queue(self, target_level: Level) -> None:
+        # get the new queue without this target level, if it was in it, since it now gets moved
+        # to the first position. this avoids double levels
+        new_queue = []
+        for q in self.queue:
+            if q != target_level: 
+                new_queue.append(q)
+
+        self.queue = [target_level] + new_queue
+        self.set_target(self.queue[0])
 
     def add_multiple_to_queue(self, target_levels: [Level]) -> None:
         self.queue += target_levels

@@ -1,3 +1,5 @@
+#! ./.venv/bin/python
+
 import pygame
 import random
 import math
@@ -13,8 +15,8 @@ from building import Building
 
 # === vars ===
 
-width = 2500
-height = 1600
+width = 2880
+height = 1720
 target_framerate = 60
 use_config = True
 
