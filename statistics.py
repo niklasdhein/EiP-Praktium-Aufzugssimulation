@@ -1,7 +1,5 @@
 import matplotlib.pyplot as plt
 
-import simulation
-
 fig, ax = plt.subplots()
 
 def pie_split(transported=int, annoyed=int, spawned=int) -> None:
