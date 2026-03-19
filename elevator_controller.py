@@ -50,6 +50,86 @@ class ElevatorController:
         the controller.
         """
         offset_x = 0
+
+        # if there is at least one penthouse, create a special elevator for them
+        if self.building.levels[-1].level_type == "penthouse":
+            # the vip elevator is allowed to access all levels, 
+            # except bunker level(s)
+            all_levels_without_bunker = []
+            for level in self.building.levels:
+                if level.level_type != "bunker":
+                    all_levels_without_bunker.append(level)
+
+            vip_elevator = Elevator(
+                elevator_controller=self,
+                speed=120,
+                capacity=1000,
+                mode=elevator_mode,
+                current_level=self.building.ground_level,
+                allowed_levels=all_levels_without_bunker,
+                use_sprite=True
+            )
+
+            # create a rect for graphics
+            vip_elevator.graphics = pygame.Rect(
+                offset_x,
+                vip_elevator.current_level.background_gfx.y + vip_elevator.current_level.background_gfx.height - 240,
+                vip_elevator.width,
+                240
+            )
+            offset_x += vip_elevator.width + self.elevator_margin_x
+
+            # get initial queue for random and pingpong mode
+            if elevator_mode == "pingpong":
+                vip_elevator.add_to_queue(vip_elevator.allowed_levels[0])
+            elif elevator_mode == "random":
+                random_level = vip_elevator.allowed_levels[random.randint(0, len(vip_elevator.allowed_levels)-1)]
+                vip_elevator.add_to_queue(random_level)
+
+            self.elevators.append(vip_elevator)
+
+        # if there is at least one bunker level, create a special elevator from the lowest
+        # basement floor, that is allowed to access the bunker
+        if self.building.levels[0].level_type == "bunker":
+            # get all bunker levels as well as the last basement level
+            bunker_levels_with_last_basement = []
+            for level in self.building.levels:
+                if level.level_type == "bunker":
+                    bunker_levels_with_last_basement.append(level)
+                else:
+                    bunker_levels_with_last_basement.append(level)
+                    break
+            
+            bunker_elevator = Elevator(
+                elevator_controller=self,
+                speed=50,
+                capacity=2000,
+                mode=elevator_mode,
+                current_level=bunker_levels_with_last_basement[-1],
+                allowed_levels=bunker_levels_with_last_basement,
+                use_sprite=True
+            )
+
+            # create a rect for graphics
+            bunker_elevator.graphics = pygame.Rect(
+                offset_x,
+                bunker_elevator.current_level.background_gfx.y + bunker_elevator.current_level.background_gfx.height - 240,
+                bunker_elevator.width,
+                240
+            )
+            offset_x += bunker_elevator.width + self.elevator_margin_x
+
+            # get initial queue for random and pingpong mode
+            if elevator_mode == "pingpong":
+                bunker_elevator.add_to_queue(bunker_elevator.allowed_levels[0])
+            elif elevator_mode == "random":
+                random_level = bunker_elevator.allowed_levels[random.randint(0, len(bunker_elevator.allowed_levels)-1)]
+                bunker_elevator.add_to_queue(random_level)
+
+            self.elevators.append(bunker_elevator)
+
+        # before creating, get all basement and upstairs levels including the ground level
+        # since every regualar elevator should be allowed to access these
         for i in range(elevator_count):
             # decide wether big or small elevator
             capacity = 2000 if random.random() <= big_elevator_spawn_probability else 1000
@@ -59,24 +139,25 @@ class ElevatorController:
             speed=100,          # if the speed is too slow and framerate too high the steps get too small for pygame to handle. be careful
             capacity=capacity,
             mode=elevator_mode,
-            current_level=self.building.levels[random.randint(0, self.building.level_count-1)]
+            current_level=self.building.levels[random.randint(0, self.building.level_count-1)],
+            allowed_levels=self.building.regular_levels,
+            use_sprite=True
             )
             
             # instantiate the pygame part
             random_elevator.graphics = pygame.Rect(
                 offset_x, 
                 random_elevator.current_level.background_gfx.y + \
-                    random_elevator.current_level.background_gfx.height - 200, 
+                    random_elevator.current_level.background_gfx.height - 240, 
                 random_elevator.width, 
-                200)
+                240)
             offset_x += random_elevator.width + self.elevator_margin_x
 
             # get initial queue for random and pingpong mode
             if elevator_mode == "pingpong":
-                random_elevator.add_to_queue(self.building.levels[0])
+                random_elevator.add_to_queue(random_elevator.allowed_levels[0])
             elif elevator_mode == "random":
-                level_count = self.building.level_count
-                random_level = self.building.levels[random.randint(0, level_count-1)]
+                random_level = random_elevator.allowed_levels[random.randint(0, len(random_elevator.allowed_levels)-1)]
                 random_elevator.add_to_queue(random_level)
 
             self.elevators.append(random_elevator)
@@ -98,7 +179,10 @@ class ElevatorController:
         """
         for call_up_level in self.elevator_calls["up"]:
             for elevator in self.elevators:
-                if len(elevator.queue) == 0 and elevator.time_elapsed >= elevator.waittime:
+                if len(elevator.queue) == 0 and \
+                call_up_level in elevator.allowed_levels and \
+                call_up_level != elevator.allowed_levels[-1] and \
+                elevator.time_elapsed >= elevator.waittime:
                     elevator.add_to_queue(call_up_level)
                     elevator.target_call = "up"
                     self.elevator_calls["up"].pop(0)
@@ -106,7 +190,10 @@ class ElevatorController:
 
         for call_down_level in self.elevator_calls["down"]:
             for elevator in self.elevators:
-                if len(elevator.queue) == 0 and elevator.time_elapsed >= elevator.waittime:
+                if len(elevator.queue) == 0 and \
+                call_down_level in elevator.allowed_levels and \
+                call_down_level != elevator.allowed_levels[0] and \
+                elevator.time_elapsed >= elevator.waittime:
                     elevator.add_to_queue(call_down_level)
                     elevator.target_call = "down"
                     self.elevator_calls["down"].pop(0)

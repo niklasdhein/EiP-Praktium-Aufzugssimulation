@@ -1,17 +1,17 @@
 import pygame
 
 class Level:
-    def __init__(self, building: Building, level: int) -> None:
+    def __init__(self, building: Building, level: int, level_type: str) -> None:
         self.building = building    # building the level belongs to
         self.level = level          # level of the level
-        self.type = None
+        self.level_type = level_type
 
         self.up_pressed = False     # tracks if someone pressed up 
         self.down_pressed = False   # or down button for elevator
         
         self.passengers = []        # list of passengers in the level
 
-        height = self.building.bottom_y / self.building.level_count
+        height = self.building.bottom_y // self.building.level_count
         self.background_gfx = pygame.Rect(
             0, 
             self.building.bottom_y - (self.level+1) * height,
@@ -21,7 +21,7 @@ class Level:
 
         # statistics variables
         self.passengers_annoyed = 0
-
+        
     def remove_passenger_from_level(self, passenger: Passenger) -> None:
         new_passengers = []
         for p in self.passengers:

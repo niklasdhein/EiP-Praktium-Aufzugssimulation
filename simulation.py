@@ -10,16 +10,17 @@ import os
 from elevator import Elevator
 from elevator_controller import ElevatorController
 from passenger import Passenger
+from codsworth import Codsworth
 from building import Building
 import statistics
 
 
 # === vars ===
 
-width = 1000
-height = 800
+width = 2500
+height = 1700
 target_framerate = 60
-use_config = False
+use_config = True
 
 
 # === simulation method(s) ===
@@ -45,13 +46,13 @@ def get_config_from_file(file_path: str="./config.json", print_config: bool=Fals
 
 def start_simulation(
     elevator_count: int=3, 
-    level_count: int=6,
-    big_elevator_spawn_probability: float=0,
+    level_count: int=5,
+    big_elevator_spawn_probability: float=0.3,
     elevator_mode: str="algorithm",     # algorithm, random, pingpong      
     passenger_spawn_chance: float=1,    # probability / second
-    passenger_patience: int=20,         # seconds
-    speed_multiplier: int=20,
-    simulation_time: int=60           #seconds
+    passenger_patience: int=25,         # seconds
+    speed_multiplier: int=3,
+    simulation_time: int=3600           #seconds
     ) -> None:
 
 
@@ -64,44 +65,82 @@ def start_simulation(
         """
         # probabilty a passenger gets spawned
         if random.random() <= passenger_spawn_chance * speed_multiplier * dt:
+            prob = random.random()
             # spawn on base level (60% chance)
             if random.random() <= 0.6:
-                start_level = building.base_level
-
+                start_level = building.ground_level
             # spawn on other random level
             else:
-                start_level = building.levels[random.randint(0, building.level_count-1)]
-            
+                start_level = building.regular_levels[random.randint(0, len(building.regular_levels) - 1)]
             # choose a valid target (not the same as the start level)
             target_level = start_level
             while target_level == start_level:
-                target_level = building.levels[random.randint(0, building.level_count-1)]
+                target_level = building.regular_levels[random.randint(0, len(building.regular_levels) - 1)]
 
-            passengers.append(
-                Passenger(
-                    current_level=start_level,
-                    target_level=target_level,
-                    weight=80,
-                    walk_speed=200,
-                    patience=passenger_patience,
-                    use_sprite=False
+            # probability codsworth gets spawned
+            if prob > 0.8 and prob <= 0.9 and building.bunker_elevator_level != None:
+                start_level = building.ground_level
+                bunker_levels = building.get_bunker_levels()
+                target_level = bunker_levels[random.randint(0, len(bunker_levels) - 1)]
+                passengers.append(
+                    Codsworth(
+                        current_level=start_level,
+                        target_level=target_level,
+                        bunker_elevator_level=building.bunker_elevator_level,
+                        weight=80,
+                        walk_speed=200,
+                        patience=passenger_patience,
+                        use_sprite=True
+                    )
                 )
-            )
-            
+
+            # probability a vip gets spawned
+            elif prob > 0.9 and building.levels[-1].level_type == "penthouse":
+                penthouse_levels = building.get_penthouse_levels()
+                passengers.append(
+                    Passenger(
+                        current_level=start_level,
+                        target_level=penthouse_levels[random.randint(0, len(penthouse_levels) - 1)],
+                        weight=80,
+                        walk_speed=200,
+                        patience=passenger_patience,
+                        use_sprite=True
+                    )
+                )
+
+            # probability a normal passenger gets spawned
+            else:
+                passengers.append(
+                    Passenger(
+                        current_level=start_level,
+                        target_level=target_level,
+                        weight=80,
+                        walk_speed=200,
+                        patience=passenger_patience,
+                        use_sprite=True
+                    )
+                )
+
             return True
         return False
 
     def draw_building() -> None:
         # draw each level 
-        for i in range(len(building.levels)):
+        for i in range(building.level_count):
             level = building.levels[i]
             button_width = 20
 
             # level background
-            if level.type == "basement":
+            if level.level_type == "bunker":
+                pygame.draw.rect(screen, (0, 0, 0) if i % 2 == 0 else (20, 20, 20), level.background_gfx)
+            elif level.level_type == "basement":
                 pygame.draw.rect(screen, (30, 30, 30) if i % 2 == 0 else (50, 50, 50), level.background_gfx)
-            elif level.type == "normal":
+            elif level.level_type == "ground":
+                pygame.draw.rect(screen, (100, 100, 100), level.background_gfx)
+            elif level.level_type == "upstairs":
                 pygame.draw.rect(screen, (150, 150, 150) if i % 2 == 0 else (170, 170, 170), level.background_gfx)
+            elif level.level_type == "penthouse":
+                pygame.draw.rect(screen, (255, 255, 255) if i % 2 == 0 else (235, 235, 235), level.background_gfx)
 
             # one elevator
             call_color = (200, 50, 50)
@@ -179,13 +218,18 @@ def start_simulation(
     def draw_elevators() -> None:
         # draw the elevators
         for e in elevator_controller.elevators:
-            # draw each elevator
-            pygame.draw.rect(screen, 
-            (255, 255, 255) if e.target_level != None else (0, 0, 200), 
-            e.graphics)
+            if not e.use_sprite:
+                # draw each elevator
+                pygame.draw.rect(screen,
+                (255, 255, 255) if e.target_level != None else (0, 0, 200),
+                e.graphics)
 
-            # draw door
-            pygame.draw.rect(screen, (0, 0, 0), e.door)
+                # draw door
+                pygame.draw.rect(screen, (0, 0, 0), e.door)
+            else:
+                screen.blit(
+                    e.shown_surface, e.graphics
+                )
 
     def draw_passengers() -> None:  
         # draw passenger
