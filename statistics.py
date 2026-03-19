@@ -19,9 +19,8 @@ def elevator_efficiency(transported=int, elevators=list) -> None:
             labels.append(f"Elevator {i}:big")
         transported_elevator = elevators[i].passengers_transported
         values.append(transported_elevator/transported*100)
-    print(values)
-    print(labels)
     plt.bar(labels, values)
+    plt.ylabel('transported/elevator')
     plt.show()
 
 
