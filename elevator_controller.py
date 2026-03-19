@@ -16,7 +16,7 @@ class ElevatorController:
         self.elevators = []         # children elevators
         self.elevator_mode = elevator_mode
 
-        self.elevator_margin_x = 100
+        self.elevator_margin_x = int(100 * entity_scale_factor)
         self.create_random_elevators(elevator_count=elevator_count,
         big_elevator_spawn_probability=big_elevator_spawn_probability,
         elevator_mode=elevator_mode,
