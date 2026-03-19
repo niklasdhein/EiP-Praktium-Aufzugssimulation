@@ -17,8 +17,8 @@ import statistics
 
 # === vars ===
 
-width = 1200
-height = 700
+width = 2000
+height = 1500
 target_framerate = 60
 use_config = True
 
@@ -90,7 +90,8 @@ def start_simulation(
                         weight=80,
                         walk_speed=200,
                         patience=passenger_patience,
-                        use_sprite=use_sprite
+                        use_sprite=use_sprite,
+                        entity_scale_factor=entity_scale_factor
                     )
                 )
 
@@ -104,7 +105,8 @@ def start_simulation(
                         weight=80,
                         walk_speed=200,
                         patience=passenger_patience,
-                        use_sprite=use_sprite
+                        use_sprite=use_sprite,
+                        entity_scale_factor=entity_scale_factor
                     )
                 )
 
@@ -117,7 +119,8 @@ def start_simulation(
                         weight=80,
                         walk_speed=200,
                         patience=passenger_patience,
-                        use_sprite=use_sprite
+                        use_sprite=use_sprite,
+                        entity_scale_factor=entity_scale_factor
                     )
                 )
 
@@ -292,6 +295,7 @@ def start_simulation(
 
     # default values for config specific settings
     use_sprite = False
+    entity_scale_factor = 1
 
     # load and use config, when said
     if use_config:
@@ -306,6 +310,7 @@ def start_simulation(
         speed_multiplier = loaded_config["speed_multiplier"]
         simulation_time = loaded_config["simulation_time"]
         use_sprite = loaded_config["use_sprite"]
+        entity_scale_factor = loaded_config["entity_scale_factor"]
 
 
     # == pre sim stuff ==
@@ -326,7 +331,8 @@ def start_simulation(
     elevator_count=elevator_count,
     big_elevator_spawn_probability=big_elevator_spawn_probability,
     elevator_mode=elevator_mode,
-    use_sprite=use_sprite
+    use_sprite=use_sprite,
+    entity_scale_factor=entity_scale_factor
     )
     building.elevator_controller = elevator_controller
 

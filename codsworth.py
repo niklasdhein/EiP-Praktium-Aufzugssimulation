@@ -11,7 +11,8 @@ class Codsworth(Passenger):
         patience: int,  
         weight: int, 
         walk_speed: int,
-        use_sprite: bool
+        use_sprite: bool,
+        entity_scale_factor: float
     ) -> None:
         super().__init__(
             current_level=current_level,
@@ -19,7 +20,8 @@ class Codsworth(Passenger):
             patience=patience,
             weight=weight,
             walk_speed=walk_speed,
-            use_sprite=use_sprite
+            use_sprite=use_sprite,
+            entity_scale_factor=entity_scale_factor
         )
 
         # set the bunker elevator as first target, also remember

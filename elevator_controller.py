@@ -10,7 +10,8 @@ class ElevatorController:
     elevator_count: int,
     big_elevator_spawn_probability: float,
     elevator_mode: str,
-    use_sprite: bool) -> None:
+    use_sprite: bool,
+    entity_scale_factor: float) -> None:
         self.building = building    # parent building
         self.elevators = []         # children elevators
         self.elevator_mode = elevator_mode
@@ -19,7 +20,8 @@ class ElevatorController:
         self.create_random_elevators(elevator_count=elevator_count,
         big_elevator_spawn_probability=big_elevator_spawn_probability,
         elevator_mode=elevator_mode,
-        use_sprite=use_sprite)
+        use_sprite=use_sprite,
+        entity_scale_factor=entity_scale_factor)
 
         # stores all elevator calls from all levels.
         # the calls are seperated in up and down calls for later
@@ -47,7 +49,8 @@ class ElevatorController:
     elevator_count: int, 
     big_elevator_spawn_probability: float,
     elevator_mode: str,
-    use_sprite: bool) -> None:
+    use_sprite: bool,
+    entity_scale_factor: int) -> None:
         """
         Creates random elevators and set these as children of
         the controller.
@@ -70,15 +73,16 @@ class ElevatorController:
                 mode=elevator_mode,
                 current_level=self.building.ground_level,
                 allowed_levels=all_levels_without_bunker,
-                use_sprite=use_sprite
+                use_sprite=use_sprite,
+                entity_scale_factor=entity_scale_factor
             )
 
             # create a rect for graphics
             vip_elevator.graphics = pygame.Rect(
                 offset_x,
-                vip_elevator.current_level.background_gfx.y + vip_elevator.current_level.background_gfx.height - 240,
-                vip_elevator.width,
-                240
+                vip_elevator.current_level.background_gfx.y + vip_elevator.current_level.background_gfx.height - 240 * entity_scale_factor,
+                vip_elevator.width * entity_scale_factor,
+                240 * entity_scale_factor
             )
             offset_x += vip_elevator.width + self.elevator_margin_x
 
@@ -110,15 +114,16 @@ class ElevatorController:
                 mode=elevator_mode,
                 current_level=bunker_levels_with_last_basement[-1],
                 allowed_levels=bunker_levels_with_last_basement,
-                use_sprite=use_sprite
+                use_sprite=use_sprite,
+                entity_scale_factor=entity_scale_factor
             )
 
             # create a rect for graphics
             bunker_elevator.graphics = pygame.Rect(
                 offset_x,
-                bunker_elevator.current_level.background_gfx.y + bunker_elevator.current_level.background_gfx.height - 240,
-                bunker_elevator.width,
-                240
+                bunker_elevator.current_level.background_gfx.y + bunker_elevator.current_level.background_gfx.height - 240 * entity_scale_factor,
+                bunker_elevator.width * entity_scale_factor,
+                240 * entity_scale_factor
             )
             offset_x += bunker_elevator.width + self.elevator_margin_x
 
@@ -144,16 +149,17 @@ class ElevatorController:
             mode=elevator_mode,
             current_level=self.building.levels[random.randint(0, self.building.level_count-1)],
             allowed_levels=self.building.regular_levels,
-            use_sprite=use_sprite
+            use_sprite=use_sprite,
+            entity_scale_factor=entity_scale_factor
             )
             
             # instantiate the pygame part
             random_elevator.graphics = pygame.Rect(
                 offset_x, 
                 random_elevator.current_level.background_gfx.y + \
-                    random_elevator.current_level.background_gfx.height - 240, 
-                random_elevator.width, 
-                240)
+                    random_elevator.current_level.background_gfx.height - 240 * entity_scale_factor,  
+                random_elevator.width * entity_scale_factor, 
+                240 * entity_scale_factor)
             offset_x += random_elevator.width + self.elevator_margin_x
 
             # get initial queue for random and pingpong mode
@@ -166,7 +172,7 @@ class ElevatorController:
             self.elevators.append(random_elevator)
 
         # for keeping things pretty, center all elevators
-        start_x = (self.building.width - self.get_total_elevators_width()) // 2
+        start_x = self.building.width // 2 - self.get_total_elevators_width() // 2
         for elevator in self.elevators:
             elevator.graphics.x += start_x
             elevator.door = pygame.Rect(

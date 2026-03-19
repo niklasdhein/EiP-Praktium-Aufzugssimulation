@@ -8,12 +8,14 @@ class Passenger:
     patience: int,  
     weight: int, 
     walk_speed: int,
-    use_sprite: bool) -> None:
+    use_sprite: bool,
+    entity_scale_factor: float) -> None:
         self.current_level = current_level          # level the passenger is in currently
         self.target_level = target_level            # level the passenger wants to travel to
         self.patience = patience
         self.weight = weight
         self.walk_speed = walk_speed
+        self.entity_scale_factor = entity_scale_factor
 
         self.use_sprite = use_sprite
         self.shown_surface_index = 0
@@ -101,50 +103,50 @@ class Passenger:
             for image in left_image_files:
                 left_loaded_surface = pygame.image.load(image_directory + image)
                 left_loaded_surface = left_loaded_surface.convert_alpha()
-                left_loaded_surface = pygame.transform.scale(left_loaded_surface, (60, 60))
+                left_loaded_surface = pygame.transform.scale(left_loaded_surface, (60 * self.entity_scale_factor, 60 * self.entity_scale_factor))
 
                 self.left_loaded_surfaces.append(left_loaded_surface)
 
             for image in right_image_files:
                 right_loaded_surface = pygame.image.load(image_directory + image)
                 right_loaded_surface = right_loaded_surface.convert_alpha()
-                right_loaded_surface = pygame.transform.scale(right_loaded_surface, (60, 60))
+                right_loaded_surface = pygame.transform.scale(right_loaded_surface, (60 * self.entity_scale_factor, 60 * self.entity_scale_factor))
 
                 self.right_loaded_surfaces.append(right_loaded_surface)
 
             for image in good_left_image_files:
                 good_left_loaded_surface = pygame.image.load(image_directory + image)
                 good_left_loaded_surface = good_left_loaded_surface.convert_alpha()
-                good_left_loaded_surface = pygame.transform.scale(good_left_loaded_surface, (60, 60))
+                good_left_loaded_surface = pygame.transform.scale(good_left_loaded_surface, (60 * self.entity_scale_factor, 60 * entity_scale_factor))
 
                 self.good_left_loaded_surfaces.append(good_left_loaded_surface)
 
             for image in good_right_files:
                 good_right_loaded_surface = pygame.image.load(image_directory + image)
                 good_right_loaded_surface = good_right_loaded_surface.convert_alpha()
-                good_right_loaded_surface = pygame.transform.scale(good_right_loaded_surface, (60, 60))
+                good_right_loaded_surface = pygame.transform.scale(good_right_loaded_surface, (60 * self.entity_scale_factor, 60 * self.entity_scale_factor))
 
                 self.good_right_loaded_surfaces.append(good_right_loaded_surface)
 
             for image in bad_right_files:
                 bad_right_loaded_surface = pygame.image.load(image_directory + image)
                 bad_right_loaded_surface = bad_right_loaded_surface.convert_alpha()
-                bad_right_loaded_surface = pygame.transform.scale(bad_right_loaded_surface, (60, 60))
+                bad_right_loaded_surface = pygame.transform.scale(bad_right_loaded_surface, (60 * self.entity_scale_factor, 60 * self.entity_scale_factor))
 
                 self.bad_right_loaded_surfaces.append(bad_right_loaded_surface)
 
             for image in idle_image_files:
                 idle_loaded_surface = pygame.image.load(image_directory + image)
                 idle_loaded_surface = idle_loaded_surface.convert_alpha()
-                idle_loaded_surface = pygame.transform.scale(idle_loaded_surface, (60, 60))
+                idle_loaded_surface = pygame.transform.scale(idle_loaded_surface, (60 * self.entity_scale_factor, 60 * self.entity_scale_factor))
 
                 self.idle_loaded_surfaces.append(idle_loaded_surface)
 
         self.graphics = pygame.Rect(
-            -60 if random.random() <= 0.5 else self.current_level.building.width, 
-            self.current_level.background_gfx.y + self.current_level.background_gfx.height - 60,
-            60, 
-            60
+            -60 * self.entity_scale_factor if random.random() <= 0.5 else self.current_level.building.width, 
+            self.current_level.background_gfx.y + self.current_level.background_gfx.height - 60 * self.entity_scale_factor,
+            60 * self.entity_scale_factor, 
+            60 * self.entity_scale_factor
         ) 
 
         # spawn each passenger with target to walk towards elevators
@@ -158,7 +160,7 @@ class Passenger:
         self.states["elevator_called"] = False
         self.current_level = new_level
         new_level.passengers.append(self)
-        self.graphics.y = self.current_level.background_gfx.y + self.current_level.background_gfx.height - 60
+        self.graphics.y = self.current_level.background_gfx.y + self.current_level.background_gfx.height - 60 * self.entity_scale_factor
         self.visible = True
 
         self.set_target(target_x=target_x)

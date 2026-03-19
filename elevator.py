@@ -11,7 +11,8 @@ class Elevator:
     mode: str,
     current_level,
     allowed_levels,
-    use_sprite: bool) -> None:
+    use_sprite: bool,
+    entity_scale_factor: float) -> None:
         self.elevator_controller = elevator_controller  # parent controller
         self.capacity = capacity    # capacity in kg 
         self.speed = speed if self.capacity <= 1000 else speed * 0.75
@@ -19,6 +20,7 @@ class Elevator:
         self.current_level = current_level
         self.allowed_levels = allowed_levels
         self.use_sprite = use_sprite
+        self.entity_scale_factor = entity_scale_factor
 
         self.width = 120 if self.capacity <= 1000 else 240
 
@@ -51,8 +53,6 @@ class Elevator:
         if self.use_sprite:
             # load and apply sprites
             image_directory = "./sprites/"
-            elevator_door_closed = "elevator_door_closed.png"
-            elevator_door_opened = "elevator_door_opened.png"
             elevator_door_close = [
                 "elevator_door_close_1.png",
                 "elevator_door_close_2.png",
@@ -85,39 +85,31 @@ class Elevator:
                 "big_elevator_door_open_6.png"
             ]
 
-            self.elevator_door_closed = pygame.image.load(image_directory + elevator_door_closed)
-            self.elevator_door_closed = self.elevator_door_closed.convert_alpha()
-            self.elevator_door_closed = pygame.transform.scale(self.elevator_door_closed, (120, 120))
-
-            self.elevator_door_opened = pygame.image.load(image_directory + elevator_door_opened)
-            self.elevator_door_opened = self.elevator_door_opened.convert_alpha()
-            self.elevator_door_opened = pygame.transform.scale(self.elevator_door_opened, (120, 120))
-
             for e in elevator_door_close:
                 loaded = pygame.image.load(image_directory + e)
                 loaded = loaded.convert_alpha()
-                loaded = pygame.transform.scale(loaded, (120, 240))
+                loaded = pygame.transform.scale(loaded, (120 * self.entity_scale_factor, 240 * self.entity_scale_factor))
                 self.elevator_door_close.append(loaded)
 
             for e in elevator_door_open:
                 loaded = pygame.image.load(image_directory + e)
                 loaded = loaded.convert_alpha()
-                loaded = pygame.transform.scale(loaded, (120, 240))
+                loaded = pygame.transform.scale(loaded, (120 * self.entity_scale_factor, 240 * self.entity_scale_factor))
                 self.elevator_door_open.append(loaded)
 
             for e in big_elevator_door_close:
                 loaded = pygame.image.load(image_directory + e)
                 loaded = loaded.convert_alpha()
-                loaded = pygame.transform.scale(loaded, (240, 240))
+                loaded = pygame.transform.scale(loaded, (240 * self.entity_scale_factor, 240 * self.entity_scale_factor))
                 self.big_elevator_door_close.append(loaded)
 
             for e in big_elevator_door_open:
                 loaded = pygame.image.load(image_directory + e)
                 loaded = loaded.convert_alpha()
-                loaded = pygame.transform.scale(loaded, (240, 240))
+                loaded = pygame.transform.scale(loaded, (240 * self.entity_scale_factor, 240 * self.entity_scale_factor))
                 self.big_elevator_door_open.append(loaded)
 
-            self.shown_surface = self.elevator_door_close[-1] if self.width == 120 else self.big_elevator_door_close[-1]
+            self.shown_surface = self.elevator_door_close[-1] if self.capacity == 1000 else self.big_elevator_door_close[-1]
             self.animation_frame_counter = 0
             self.frametime = 0
 
@@ -168,7 +160,7 @@ class Elevator:
                 for passenger in self.passengers:
                     if self.current_level == passenger.target_level:     # kick out passengers at target
                         building_width = self.elevator_controller.building.width
-                        passenger.leave_elevator(-60 if random.random() <= 0.5 else building_width, self.target_level)
+                        passenger.leave_elevator(-60 * self.entity_scale_factor if random.random() <= 0.5 else building_width, self.target_level)
                         
                         # check if a passenger actually reached its target after it exited
                         # passengers who have to travel more than once as example
@@ -262,13 +254,13 @@ class Elevator:
 
             # if doors are not closed fully, close them
             if self.use_sprite:
-                if self.shown_surface != self.elevator_door_close[-1] and self.width == 120\
-                    or self.shown_surface != self.big_elevator_door_close[-1] and self.width == 240:
-                    if self.frametime >= 0.2 and self.width == 120 and self.animation_frame_counter < len(self.elevator_door_close) - 1:
+                if self.shown_surface != self.elevator_door_close[-1] and self.capacity == 1000\
+                    or self.shown_surface != self.big_elevator_door_close[-1] and self.capacity == 2000:
+                    if self.frametime >= 0.2 and self.capacity == 1000 and self.animation_frame_counter < len(self.elevator_door_close) - 1:
                         self.frametime = 0
                         self.animation_frame_counter += 1
                         self.shown_surface = self.elevator_door_close[self.animation_frame_counter]
-                    elif self.frametime >= 0.2 and self.width == 240 and self.animation_frame_counter < len(self.big_elevator_door_close) - 1:
+                    elif self.frametime >= 0.2 and self.capacity == 2000 and self.animation_frame_counter < len(self.big_elevator_door_close) - 1:
                         self.frametime = 0
                         self.animation_frame_counter += 1
                         self.shown_surface = self.big_elevator_door_close[self.animation_frame_counter]
@@ -302,13 +294,13 @@ class Elevator:
 
             # if doors are not opened, open them
             if self.use_sprite:
-                if self.shown_surface != self.elevator_door_open[-1] and self.width == 120 \
-                    or self.shown_surface != self.big_elevator_door_open[-1] and self.width == 240:
-                    if self.frametime >= 0.2 and self.width == 120 and self.animation_frame_counter < len(self.elevator_door_open) - 1:
+                if self.shown_surface != self.elevator_door_open[-1] and self.capacity == 1000 \
+                    or self.shown_surface != self.big_elevator_door_open[-1] and self.capacity == 2000:
+                    if self.frametime >= 0.2 and self.capacity == 1000 and self.animation_frame_counter < len(self.elevator_door_open) - 1:
                         self.frametime = 0
                         self.animation_frame_counter += 1
                         self.shown_surface = self.elevator_door_open[self.animation_frame_counter]
-                    elif self.frametime >= 0.2 and self.width == 240 and self.animation_frame_counter < len(self.big_elevator_door_open) - 1:
+                    elif self.frametime >= 0.2 and self.capacity == 2000 and self.animation_frame_counter < len(self.big_elevator_door_open) - 1:
                         self.frametime = 0
                         self.animation_frame_counter += 1
                         self.shown_surface = self.big_elevator_door_open[self.animation_frame_counter]
