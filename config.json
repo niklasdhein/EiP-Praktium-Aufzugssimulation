@@ -6,6 +6,6 @@
     "passenger_spawn_chance": 0.1,
     "passenger_patience": 25,
     "speed_multiplier": 50,
-    "simulation_time": 20,
-    "use_sprite": false
+    "simulation_time": 3600,
+    "use_sprite": true
 }
