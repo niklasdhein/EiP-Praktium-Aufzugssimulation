@@ -208,7 +208,7 @@ class ElevatorController:
         and no elevator is already moving towards the level. 
         """
 
-        def any_elevator_has_level_in_queue(level: Level) -> bool:
+        def any_elevator_has_level_in_queue(level) -> bool:
             """
             Checks if any elevator is travelling to that level.
             """
@@ -217,7 +217,7 @@ class ElevatorController:
                     return True
             return False
 
-        def any_elevator_is_moving_towards_level(level: Level) -> bool:
+        def any_elevator_is_moving_towards_level(level) -> bool:
             """
             Checks if any elevator is travelling towards that level right now.
             Returns true if so, false otherwise.

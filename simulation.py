@@ -17,8 +17,8 @@ import statistics
 
 # === vars ===
 
-width = 2500
-height = 1700
+width = 1200
+height = 700
 target_framerate = 60
 use_config = True
 

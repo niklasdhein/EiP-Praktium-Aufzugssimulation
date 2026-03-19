@@ -5,9 +5,9 @@ from passenger import Passenger
 class Codsworth(Passenger):
     def __init__(
         self,
-        current_level: Level, 
-        target_level: Level,
-        bunker_elevator_level: Level,
+        current_level, 
+        target_level,
+        bunker_elevator_level,
         patience: int,  
         weight: int, 
         walk_speed: int,
@@ -28,7 +28,7 @@ class Codsworth(Passenger):
         self.bunker_target_level = self.target_level
         self.target_level = self.bunker_elevator_level
 
-    def leave_elevator(self, target_x: int, new_level: Level) -> None:
+    def leave_elevator(self, target_x: int, new_level) -> None:
         self.states["in_elevator"] = False
         self.states["elevator_called"] = False
         self.current_level = new_level

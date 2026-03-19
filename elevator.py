@@ -5,12 +5,12 @@ import pygame
 
 class Elevator:
     def __init__(self, 
-    elevator_controller: ElevatorController, 
+    elevator_controller, 
     capacity: int, 
     speed: float,
     mode: str,
-    current_level: Level,
-    allowed_levels: [Level],
+    current_level,
+    allowed_levels,
     use_sprite: bool) -> None:
         self.elevator_controller = elevator_controller  # parent controller
         self.capacity = capacity    # capacity in kg 
@@ -331,7 +331,7 @@ class Elevator:
         self.direction = 0
         self.queue.pop(0)
 
-    def set_target(self, target_level: Level) -> None:
+    def set_target(self, target_level) -> None:
         target_y = target_level.background_gfx.y + target_level.background_gfx.height - self.graphics.height
 
         self.target_level = target_level
@@ -341,12 +341,12 @@ class Elevator:
         elif self.graphics.y > self.target_y: self.direction = -1
         else: self.direction = 0
 
-    def add_to_queue(self, target_level: Level) -> None:
+    def add_to_queue(self, target_level) -> None:
         self.queue.append(target_level)
         if self.target_level == None:
             self.set_target(self.queue[0])
 
-    def add_as_first_to_queue(self, target_level: Level) -> None:
+    def add_as_first_to_queue(self, target_level) -> None:
         # get the new queue without this target level, if it was in it, since it now gets moved
         # to the first position. this avoids double levels
         new_queue = []
@@ -357,7 +357,7 @@ class Elevator:
         self.queue = [target_level] + new_queue
         self.set_target(self.queue[0])
 
-    def add_multiple_to_queue(self, target_levels: [Level]) -> None:
+    def add_multiple_to_queue(self, target_levels) -> None:
         self.queue += target_levels
         if self.target_level == None and len(self.queue) > 0: # in case some idiot sent empty list and queue was empty
             self.set_target(self.queue[0])

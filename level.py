@@ -1,7 +1,7 @@
 import pygame
 
 class Level:
-    def __init__(self, building: Building, level: int, level_type: str) -> None:
+    def __init__(self, building, level: int, level_type: str) -> None:
         self.building = building    # building the level belongs to
         self.level = level          # level of the level
         self.level_type = level_type
@@ -22,7 +22,7 @@ class Level:
         # statistics variables
         self.passengers_annoyed = 0
         
-    def remove_passenger_from_level(self, passenger: Passenger) -> None:
+    def remove_passenger_from_level(self, passenger) -> None:
         new_passengers = []
         for p in self.passengers:
             if p != passenger: 

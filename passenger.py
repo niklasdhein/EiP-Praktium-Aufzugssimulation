@@ -3,8 +3,8 @@ import random
 
 class Passenger:
     def __init__(self, 
-    current_level: Level, 
-    target_level: Level,
+    current_level, 
+    target_level,
     patience: int,  
     weight: int, 
     walk_speed: int,
@@ -153,7 +153,7 @@ class Passenger:
         target_x = random.randint(screen_center_x - half_total_elevators_width, screen_center_x + half_total_elevators_width)
         self.set_target(target_x=target_x)
 
-    def leave_elevator(self, target_x: int, new_level: Level) -> None:
+    def leave_elevator(self, target_x: int, new_level) -> None:
         self.states["in_elevator"] = False
         self.states["elevator_called"] = False
         self.current_level = new_level
