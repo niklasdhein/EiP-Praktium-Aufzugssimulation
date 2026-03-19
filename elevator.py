@@ -84,39 +84,39 @@ class Elevator:
                 "big_elevator_door_open_5.png",
                 "big_elevator_door_open_6.png"
             ]
-    
+
             self.elevator_door_closed = pygame.image.load(image_directory + elevator_door_closed)
             self.elevator_door_closed = self.elevator_door_closed.convert_alpha()
             self.elevator_door_closed = pygame.transform.scale(self.elevator_door_closed, (120, 120))
-    
+
             self.elevator_door_opened = pygame.image.load(image_directory + elevator_door_opened)
             self.elevator_door_opened = self.elevator_door_opened.convert_alpha()
             self.elevator_door_opened = pygame.transform.scale(self.elevator_door_opened, (120, 120))
-    
+
             for e in elevator_door_close:
                 loaded = pygame.image.load(image_directory + e)
                 loaded = loaded.convert_alpha()
                 loaded = pygame.transform.scale(loaded, (120, 240))
                 self.elevator_door_close.append(loaded)
-    
+
             for e in elevator_door_open:
                 loaded = pygame.image.load(image_directory + e)
                 loaded = loaded.convert_alpha()
                 loaded = pygame.transform.scale(loaded, (120, 240))
                 self.elevator_door_open.append(loaded)
-    
+
             for e in big_elevator_door_close:
                 loaded = pygame.image.load(image_directory + e)
                 loaded = loaded.convert_alpha()
                 loaded = pygame.transform.scale(loaded, (240, 240))
                 self.big_elevator_door_close.append(loaded)
-    
+
             for e in big_elevator_door_open:
                 loaded = pygame.image.load(image_directory + e)
                 loaded = loaded.convert_alpha()
                 loaded = pygame.transform.scale(loaded, (240, 240))
                 self.big_elevator_door_open.append(loaded)
-    
+
             self.shown_surface = self.elevator_door_close[-1] if self.width == 120 else self.big_elevator_door_close[-1]
             self.animation_frame_counter = 0
             self.frametime = 0

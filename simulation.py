@@ -90,7 +90,7 @@ def start_simulation(
                         weight=80,
                         walk_speed=200,
                         patience=passenger_patience,
-                        use_sprite=True
+                        use_sprite=use_sprite
                     )
                 )
 
@@ -104,7 +104,7 @@ def start_simulation(
                         weight=80,
                         walk_speed=200,
                         patience=passenger_patience,
-                        use_sprite=True
+                        use_sprite=use_sprite
                     )
                 )
 
@@ -117,7 +117,7 @@ def start_simulation(
                         weight=80,
                         walk_speed=200,
                         patience=passenger_patience,
-                        use_sprite=True
+                        use_sprite=use_sprite
                     )
                 )
 
@@ -290,6 +290,9 @@ def start_simulation(
 
     # == before setup ==
 
+    # default values for config specific settings
+    use_sprite = False
+
     # load and use config, when said
     if use_config:
         loaded_config = get_config_from_file(file_path="./config.json", print_config=True)
@@ -302,6 +305,7 @@ def start_simulation(
         passenger_patience = loaded_config["passenger_patience"]
         speed_multiplier = loaded_config["speed_multiplier"]
         simulation_time = loaded_config["simulation_time"]
+        use_sprite = loaded_config["use_sprite"]
 
 
     # == pre sim stuff ==
@@ -321,7 +325,8 @@ def start_simulation(
     building=building, 
     elevator_count=elevator_count,
     big_elevator_spawn_probability=big_elevator_spawn_probability,
-    elevator_mode=elevator_mode
+    elevator_mode=elevator_mode,
+    use_sprite=use_sprite
     )
     building.elevator_controller = elevator_controller
 

@@ -9,7 +9,8 @@ class ElevatorController:
     building: Building, 
     elevator_count: int,
     big_elevator_spawn_probability: float,
-    elevator_mode: str) -> None:
+    elevator_mode: str,
+    use_sprite: bool) -> None:
         self.building = building    # parent building
         self.elevators = []         # children elevators
         self.elevator_mode = elevator_mode
@@ -17,7 +18,8 @@ class ElevatorController:
         self.elevator_margin_x = 100
         self.create_random_elevators(elevator_count=elevator_count,
         big_elevator_spawn_probability=big_elevator_spawn_probability,
-        elevator_mode=elevator_mode)
+        elevator_mode=elevator_mode,
+        use_sprite=use_sprite)
 
         # stores all elevator calls from all levels.
         # the calls are seperated in up and down calls for later
@@ -44,7 +46,8 @@ class ElevatorController:
     def create_random_elevators(self, 
     elevator_count: int, 
     big_elevator_spawn_probability: float,
-    elevator_mode: str) -> None:
+    elevator_mode: str,
+    use_sprite: bool) -> None:
         """
         Creates random elevators and set these as children of
         the controller.
@@ -67,7 +70,7 @@ class ElevatorController:
                 mode=elevator_mode,
                 current_level=self.building.ground_level,
                 allowed_levels=all_levels_without_bunker,
-                use_sprite=False
+                use_sprite=use_sprite
             )
 
             # create a rect for graphics
@@ -107,7 +110,7 @@ class ElevatorController:
                 mode=elevator_mode,
                 current_level=bunker_levels_with_last_basement[-1],
                 allowed_levels=bunker_levels_with_last_basement,
-                use_sprite=False
+                use_sprite=use_sprite
             )
 
             # create a rect for graphics
@@ -141,7 +144,7 @@ class ElevatorController:
             mode=elevator_mode,
             current_level=self.building.levels[random.randint(0, self.building.level_count-1)],
             allowed_levels=self.building.regular_levels,
-            use_sprite=False
+            use_sprite=use_sprite
             )
             
             # instantiate the pygame part
