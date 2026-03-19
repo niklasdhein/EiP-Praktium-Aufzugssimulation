@@ -5,3 +5,5 @@ Features der Simulation
 - Bunker- und Penthouseetagen, die nur von bestimmten Personen erreicht werden können
 - Animierte Passagiere und Aufzüge
 - Statistikdiagramme
+- Komplette Simulation geschwindigkeits- und faktorbasiert. Also nicht fixe Simulationsteps pro Frame, sondern unabhängig von der Framerate
+
