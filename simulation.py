@@ -16,8 +16,8 @@ from building import Building
 
 # === vars ===
 
-width = 1500
-height = 1300
+width = 2500
+height = 1700
 target_framerate = 60
 use_config = True
 
@@ -76,21 +76,8 @@ def start_simulation(
             while target_level == start_level:
                 target_level = building.regular_levels[random.randint(0, len(building.regular_levels) - 1)]
 
-            # probability a normal passenger gets spawned
-            if prob <= 0.8:
-                passengers.append(
-                    Passenger(
-                        current_level=start_level,
-                        target_level=target_level,
-                        weight=80,
-                        walk_speed=200,
-                        patience=passenger_patience,
-                        use_sprite=True
-                    )
-                )
-
             # probability codsworth gets spawned 
-            elif prob > 0.8 and building.bunker_elevator_level != None:
+            if prob > 0.8 and prob <= 0.9 and building.bunker_elevator_level != None:
                 start_level = building.ground_level
                 bunker_levels = building.get_bunker_levels()
                 target_level = bunker_levels[random.randint(0, len(bunker_levels) - 1)]
@@ -106,7 +93,33 @@ def start_simulation(
                     )
                 )
             
-            else: return False
+            # probability a vip gets spawned
+            elif prob > 0.9 and building.levels[-1].level_type == "penthouse": 
+                penthouse_levels = building.get_penthouse_levels()
+                passengers.append(
+                    Passenger(
+                        current_level=start_level,
+                        target_level=penthouse_levels[random.randint(0, len(penthouse_levels) - 1)],
+                        weight=80,
+                        walk_speed=200,
+                        patience=passenger_patience,
+                        use_sprite=True
+                    )
+                )
+            
+            # probability a normal passenger gets spawned
+            else:
+                passengers.append(
+                    Passenger(
+                        current_level=start_level,
+                        target_level=target_level,
+                        weight=80,
+                        walk_speed=200,
+                        patience=passenger_patience,
+                        use_sprite=True
+                    )
+                )
+                
             return True
         return False
 

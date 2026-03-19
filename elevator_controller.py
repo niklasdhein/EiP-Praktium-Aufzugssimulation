@@ -62,12 +62,12 @@ class ElevatorController:
 
             vip_elevator = Elevator(
                 elevator_controller=self,
-                speed=200,
+                speed=120,
                 capacity=1000,
                 mode=elevator_mode,
                 current_level=self.building.ground_level,
                 allowed_levels=all_levels_without_bunker,
-                use_sprite=False
+                use_sprite=True
             )
 
             # create a rect for graphics
@@ -78,6 +78,13 @@ class ElevatorController:
                 240
             )
             offset_x += vip_elevator.width + self.elevator_margin_x
+
+            # get initial queue for random and pingpong mode
+            if elevator_mode == "pingpong":
+                vip_elevator.add_to_queue(vip_elevator.allowed_levels[0])
+            elif elevator_mode == "random":
+                random_level = vip_elevator.allowed_levels[random.randint(0, len(vip_elevator.allowed_levels)-1)]
+                vip_elevator.add_to_queue(random_level)
 
             self.elevators.append(vip_elevator)
 
@@ -100,7 +107,7 @@ class ElevatorController:
                 mode=elevator_mode,
                 current_level=bunker_levels_with_last_basement[-1],
                 allowed_levels=bunker_levels_with_last_basement,
-                use_sprite=False
+                use_sprite=True
             )
 
             # create a rect for graphics
@@ -111,6 +118,13 @@ class ElevatorController:
                 240
             )
             offset_x += bunker_elevator.width + self.elevator_margin_x
+
+            # get initial queue for random and pingpong mode
+            if elevator_mode == "pingpong":
+                bunker_elevator.add_to_queue(bunker_elevator.allowed_levels[0])
+            elif elevator_mode == "random":
+                random_level = bunker_elevator.allowed_levels[random.randint(0, len(bunker_elevator.allowed_levels)-1)]
+                bunker_elevator.add_to_queue(random_level)
 
             self.elevators.append(bunker_elevator)
 
@@ -127,7 +141,7 @@ class ElevatorController:
             mode=elevator_mode,
             current_level=self.building.levels[random.randint(0, self.building.level_count-1)],
             allowed_levels=self.building.regular_levels,
-            use_sprite=False
+            use_sprite=True
             )
             
             # instantiate the pygame part
@@ -141,9 +155,9 @@ class ElevatorController:
 
             # get initial queue for random and pingpong mode
             if elevator_mode == "pingpong":
-                random_elevator.add_to_queue(self.building.regular_levels[0])
+                random_elevator.add_to_queue(random_elevator.allowed_levels[0])
             elif elevator_mode == "random":
-                random_level = self.building.regular_levels[random.randint(0, len(self.building.regular_levels)-1)]
+                random_level = random_elevator.allowed_levels[random.randint(0, len(random_elevator.allowed_levels)-1)]
                 random_elevator.add_to_queue(random_level)
 
             self.elevators.append(random_elevator)

@@ -25,6 +25,13 @@ class Building:
                 return bunker_levels
             bunker_levels.append(level)
 
+    def get_penthouse_levels(self):
+        penthouse_levels = []
+        for level in self.levels:
+            if level.level_type == "penthouse":
+                penthouse_levels.append(level)
+        return penthouse_levels
+
     def create_levels(self) -> None:
         # spawn bunker only if 3 levels are able to exist (bunker, basement, ground)
         while random.random() <= 0.4 and self.level_count - len(self.levels) >= 3:
