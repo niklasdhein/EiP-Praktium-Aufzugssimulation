@@ -11,5 +11,6 @@ def pie_split(transported, annoyed, spawned):
     ax.pie(sizes, labels=labels)
     plt.show()
 
-#def elevator_effectiveness
-pie_split(5, 2, 9)
+if __name__ == "__main__":
+    #def elevator_effectiveness
+    pie_split(5, 2, 9)
