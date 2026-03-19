@@ -67,7 +67,7 @@ class ElevatorController:
                 mode=elevator_mode,
                 current_level=self.building.ground_level,
                 allowed_levels=all_levels_without_bunker,
-                use_sprite=True
+                use_sprite=False
             )
 
             # create a rect for graphics
@@ -107,7 +107,7 @@ class ElevatorController:
                 mode=elevator_mode,
                 current_level=bunker_levels_with_last_basement[-1],
                 allowed_levels=bunker_levels_with_last_basement,
-                use_sprite=True
+                use_sprite=False
             )
 
             # create a rect for graphics
@@ -141,7 +141,7 @@ class ElevatorController:
             mode=elevator_mode,
             current_level=self.building.levels[random.randint(0, self.building.level_count-1)],
             allowed_levels=self.building.regular_levels,
-            use_sprite=True
+            use_sprite=False
             )
             
             # instantiate the pygame part
