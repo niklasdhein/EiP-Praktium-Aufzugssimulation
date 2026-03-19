@@ -401,6 +401,7 @@ def start_simulation(
         print(f"elevator {i} ({"small" if elevator_controller.elevators[i].capacity <= 1000 else "big"}):\t{transported} ({transported/passengers_spawned*100:.2f}%)")
 
     statistics.pie_split(passengers_transported, passengers_annoyed, passengers_spawned)
+    statistics.elevator_efficiency(passengers_transported, elevator_controller.elevators)
 
 # check if running as main
 if __name__ == "__main__":
