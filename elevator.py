@@ -135,10 +135,6 @@ class Elevator:
                 self.passengers.pop()
 
         def add_calls_on_the_way() -> None:
-            print(f"elevator is travelling to level {self.target_level.level if self.target_level != None else "none"}.")
-            print("checking for calls on the way ..")
-
-            old_queue = self.queue
 
             # check down calls
             if self.direction == 1:
@@ -146,7 +142,6 @@ class Elevator:
                 for level in passing_levels:
                     if level in self.elevator_controller.elevator_calls["down"]:
                         self.add_as_first_to_queue(target_level=level)
-                        print(f"(down) found call in level {level.level}")
 
             # check up calls
             elif self.direction == -1:
@@ -154,16 +149,6 @@ class Elevator:
                 for level in passing_levels:
                     if level in self.elevator_controller.elevator_calls["up"]:
                         self.add_as_first_to_queue(target_level=level)
-                        print(f"(up) found call in level {level.level}")
-            
-            print("respected possible calls.")
-            print("old queue:")
-            for q in old_queue:
-                print(f"[ {q.level} ]")
-            print("\nnew queue:")
-            for q in self.queue:
-                print(f"[ {q.level} ]")
-            print()
 
         # == move if allowed to ==
         if self.time_elapsed >= self.waittime:

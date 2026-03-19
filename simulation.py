@@ -11,14 +11,15 @@ from elevator import Elevator
 from elevator_controller import ElevatorController
 from passenger import Passenger
 from building import Building
+import statistics
 
 
 # === vars ===
 
-width = 2880
-height = 1720
+width = 1000
+height = 800
 target_framerate = 60
-use_config = True
+use_config = False
 
 
 # === simulation method(s) ===
@@ -44,13 +45,13 @@ def get_config_from_file(file_path: str="./config.json", print_config: bool=Fals
 
 def start_simulation(
     elevator_count: int=3, 
-    level_count: int=5,
-    big_elevator_spawn_probability: float=0.3,
+    level_count: int=6,
+    big_elevator_spawn_probability: float=0,
     elevator_mode: str="algorithm",     # algorithm, random, pingpong      
     passenger_spawn_chance: float=1,    # probability / second
-    passenger_patience: int=25,         # seconds
-    speed_multiplier: int=3,
-    simulation_time: int=3600           #seconds
+    passenger_patience: int=20,         # seconds
+    speed_multiplier: int=20,
+    simulation_time: int=60           #seconds
     ) -> None:
 
 
@@ -83,7 +84,7 @@ def start_simulation(
                     weight=80,
                     walk_speed=200,
                     patience=passenger_patience,
-                    use_sprite=True
+                    use_sprite=False
                 )
             )
             
@@ -349,6 +350,8 @@ def start_simulation(
     for i in range(len(elevator_controller.elevators)):
         transported = elevator_controller.elevators[i].passengers_transported
         print(f"elevator {i} ({"small" if elevator_controller.elevators[i].capacity <= 1000 else "big"}):\t{transported} ({transported/passengers_spawned*100:.2f}%)")
+
+    statistics.pie_split(passengers_transported, passengers_annoyed, passengers_spawned)
 
 # check if running as main
 if __name__ == "__main__":
