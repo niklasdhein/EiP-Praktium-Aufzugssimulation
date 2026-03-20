@@ -20,7 +20,7 @@ import statistics
 width = 2000
 height = 1500
 target_framerate = 60
-use_config = True
+use_config = False
 
 
 # === simulation method(s) ===

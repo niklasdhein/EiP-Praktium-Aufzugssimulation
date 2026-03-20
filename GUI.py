@@ -1,4 +1,4 @@
-import simulation
+import main 
 
 import tkinter as tk
 from tkinter import ttk
@@ -13,7 +13,7 @@ entry_style.configure("BW.TLabel", foreground="black", background="#646464")
 
 
 def start_simulation():
-    simulation.start_simulation(
+    main.start_simulation(
         elevator_count=int(elevators.get()), 
         level_count=int(levels.get()),
         big_elevator_spawn_probability=float(big_elevator_spawn_probability.get()),
