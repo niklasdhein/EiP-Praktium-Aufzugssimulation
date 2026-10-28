@@ -15,3 +15,6 @@ Anleitung zum Ausführen
 - Mit Python main.py ausführen oder, wenn Modus gesetzt ist ./main.py - dabei ist es aber wichtig, dass virtuelle Environment wie in Zeile 1 in main.py unter .venv/ definiert ist, sonst wird der Interpreter nicht gefunden
 - Andernfalls kann mit GUI.py mit Python gestartet werden, das die Simulation mit den dort eingegebenen Werten startet. Wichtig ist, dass vorher manuell in main.py korrekt gesetzt wird, ob die Simulation die Werte aus der Konfigurationsdatei (config.json) einliest oder die aus dem GUI übernimmt
 - Zusätzlich lassen sich in der Konfigurationsdatei Simulationsparameter einstellen, zwei mehr als in der GUI, nämlich ob Sprites benutzt werden sollen oder ein Skalierungsfaktor
+
+### NOTE
+Das Repository existiert im Rahmen des zweiwöchigen Praktikums des Moduls "Einfühung in die Programmierung" der JGU Mainz aus dem Wintersemester 25/26. Ursprünglich war es als GitLab Repository angelegt.
